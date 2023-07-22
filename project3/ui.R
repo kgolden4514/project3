@@ -24,7 +24,10 @@ shinyUI(fluidPage(
                                   "10th grade", 
                                   "11th grade",
                                   '12th grade'),
-                      selected = 1)
+                      selected = "9th grade"),
+         checkboxInput("gender", 
+                       h4("Color Code Gender", 
+                          style = "color:#FB6107;")),
        ),
         mainPanel(
           plotOutput('height')
