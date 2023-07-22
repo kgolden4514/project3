@@ -7,80 +7,76 @@ shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
   student <- read.csv('data.csv')
   
-  # Create Plot
+  getData <- reactive({
+    v <- input$grade
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+    newData <- student %>% filter(Grade == v)
+    }
+    else if (v == "All grades") {
+    newData <- student
+    }
+  })
+  
   output$height <- renderPlot({
-    #get filtered data
-    if (input$grade == '9th grade' & !input$gender){
-      filt <- student %>% filter(Grade == 9)
-      g <- ggplot(filt, aes(x = Height_in)) 
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="9th Graders Height in Inches",
-             x = "Height in Inches", 
-             y = "9th Grade")
+    v <- input$type
+    newData <- getData()
+    var <- input$var
+    if ((v == 1) & !input$gender) {
+      newData <- getData()
+      g <- ggplot(newData, aes_string(x = var))
+      m <- g + geom_boxplot(color = '#7CB518', fill = '#7CB518', 
+                            alpha=0.2) + coord_flip() 
       print(m)
     }
-    else if (input$grade == '9th grade' & input$gender) {
-      filt <- student %>% filter(Grade == 9)
-      g <- ggplot(filt, aes(x = Height_in, color = Gender))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="9th Graders Height in Inches by Gender",
-             x = "Height in Inches", 
-             y = "9th Grade")
+    else if ((v == 1) & input$gender) {
+      newData <- getData()
+      g <- ggplot(newData, aes_string(x = var))
+      m <- g + geom_boxplot(aes(color = Gender, fill = Gender),
+                            alpha = 0.2) + coord_flip()  
+      print(m) 
+    }
+    else if ((v == 2) & !input$gender) { 
+      newData <- getData()
+      g <- ggplot(newData, aes_string(x = var))
+      m <- g + geom_histogram(color = '#7CB518', fill = '#7CB518', 
+                              alpha=0.2, bins = 15)
       print(m)
     }
-    else if (input$grade == '10th grade' & !input$gender){
-      filt <- student %>% filter(Grade == 10)
-      g <- ggplot(filt, aes(x = Height_in))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="10th Graders Height in Inches",
-             x = "Height in Inches", 
-             y = "10th Grade")
+    else if ((v == 2) & input$gender) { 
+      newData <- getData()
+      g <- ggplot(newData, aes_string(x = var))
+      m <- g + geom_histogram(aes(color = Gender, fill = Gender),
+                              alpha = 0.2, bins = 15)
       print(m)
     }
-    else if (input$grade == '10th grade' & input$gender) {
-      filt <- student %>% filter(Grade == 10)
-      g <- ggplot(filt, aes(x = Height_in, color = Gender))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="10th Graders Height in Inches by Gender",
-             x = "Height in Inches", 
-             y = "10th Grade")
-      print(m)
+  })
+  
+  #Update title
+  output$title <- renderUI({
+    v <- input$grade
+    var <- input$var
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+      paste0('Investigation of ', v, 'th graders')
     }
-    else if (input$grade == '11th grade' & !input$gender) {
-      filt <- student %>% filter(Grade == 11)
-      g <- ggplot(filt, aes(x = Height_in))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="11th Graders Height in Inches",
-             x = "Height in Inches", 
-             y = "11th Grade")
-      print(m)
+    else if (v == "All grades"){
+    paste0('Investigation of all grades')  
     }
-    else if (input$grade == '11th grade' & input$gender) {
-      filt <- student %>% filter(Grade == 11)
-      g <- ggplot(filt, aes(x = Height_in, color = Gender))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="11th Graders Height in Inches by Gender",
-             x = "Height in Inches", 
-             y = "11th Grade")
-      print(m)
-    }
-    else if (input$grade == '12th grade' & !input$gender) {
-      filt <- student %>% filter(Grade == 12)
-      g <- ggplot(filt, aes(x = Height_in))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="12th Graders Height in Inches",
-             x = "Height in Inches", 
-             y = "12th Grade")
-      print(m)
-    }
-    else if (input$grade == '12th grade' & input$gender) {
-      filt <- student %>% filter(Grade == 12)
-      g <- ggplot(filt, aes(x = Height_in, color = Gender))
-      m <- g + geom_boxplot() + coord_flip() + 
-        labs(title="12th Graders Height in Inches by Gender",
-             x = "Height in Inches", 
-             y = "12th Grade")
-      print(m)
-    }
+  })
+  
+  output$table <- renderDataTable({
+    var <- input$var
+    stat <- input$stat
+    newData <- getData()
+    newDataSub <- newData[, c("Grade", "Gender", "Age", var), 
+                          drop = FALSE]
+    tab <- aggregate(newDataSub[[var]] ~ Grade + Gender + Age, 
+                     data = newDataSub, 
+                     FUN = stat)
+    colnames(tab) <- c("Grade", 'Gender', "Age", "Stat")
+    names(tab)[names(tab) == 'Stat'] <- paste0(stat , var)
+    tab <- tab %>%                   # Using dplyr functions
+      mutate_if(is.numeric,
+                round,
+                digits = 2)
   })
 })
