@@ -4,7 +4,7 @@ library(tidyverse)
 
 shinyUI(fluidPage(
   navbarPage('Golden Project 3',
-      tabPanel('About',
+    tabPanel('About',
       titlePanel('About'),
       sidebarLayout(
         sidebarPanel(
@@ -14,14 +14,13 @@ shinyUI(fluidPage(
           
         )
    )),
-   navbarMenu('Data Exploration',
-     tabPanel('Quantitative',
+   tabPanel('Data Exploration',
      # titlePanel('Data Exploration'),
      titlePanel(uiOutput("title")),
      sidebarLayout(
        sidebarPanel(
-         selectInput("var", label = h4("Select variable",
-                                       style = "color:#00A8C9;"),
+         selectInput("var", label = h6("Select variable",
+                                       style = "color:#FB6107;"),
                      choices = list("Armspan (in)" = "Armspan_in",
                                     "Height (in)" = "Height_in",
                                     "Commute Time to School (min)" =
@@ -33,73 +32,44 @@ shinyUI(fluidPage(
                                     "Number of Occupants in Home" =
                                       "HomeOccup"),
                      selected = "Armspan_in"),
-         selectInput(inputId = "grade" ,
-                      label = h4("Select Grade Level",
-                                 style = "color:#00A8C9;"),
+         selectInput(inputId = "grade" , 
+                      label = h6("Select Grade Level", 
+                                 style = "color:#FB6107;"), 
                       choices = list('All grades',
                                   "9th grade" = 9,
-                                  "10th grade" = 10,
+                                  "10th grade" = 10, 
                                   "11th grade" = 11,
                                   '12th grade' = 12),
                       selected = "All grades"),
          selectInput(inputId = 'type',
-                     label = h4("Select Graph", 
-                                style = 'color:#00A8C9;'),
-                     choices = list('Boxplot' = 1,
+                     label = h6("Select Graph", style = 'color:#FB6107;'),
+                     choices = list('Boxplot' = 1, 
                                     'Histogram' = 2),
                      selected = 1),
-         checkboxInput("gender", h4("Color Code Gender",
-                                    style = "color:#00A8C9;")),
-         selectInput("stat", label = h4("Select statistic",
-                                        style = "color:#00A8C9;"),
+         checkboxInput("gender", h6("Color Code Gender", 
+                                    style = "color:#FB6107;")),
+         selectInput("stat", label = h6("Select statistic",
+                                        style = "color:#FB6107;"), 
                      choices = list("Median" = "median",
                                     "Mean" = 'mean',
-                                    "Standard Deviation" = "sd"),
+                                    "Standard Deviation" = "sd"), 
                      selected = "median"),
        ),
         mainPanel(
-          plotOutput('graph'),
+          plotOutput('height'),
           dataTableOutput('table')
        )
    )),
-      tabPanel('Categorical',
-        sidebarLayout(
-          sidebarPanel(
-                
-              ),
-           mainPanel(
-                
-              )
-    ))),
-   
-   navbarMenu('Modeling',
-   tabPanel('Modeling Info',
+   tabPanel('Modeling',
+     titlePanel('Modeling'),
      sidebarLayout(
        sidebarPanel(
-
+         
        ),
       mainPanel(
-
+        
       )
    )),
-   tabPanel('Model Fitting',
-     sidebarLayout(
-       sidebarPanel(
-         
-       ),
-       mainPanel(
-         
-       )
-    )),
-   tabPanel('Prediction',
-     sidebarLayout(
-       sidebarPanel(
-         
-       ),
-       mainPanel(
-         
-       )
-     ))),
    tabPanel('Data',
      titlePanel('Data'),
      sidebarLayout(
