@@ -33,17 +33,24 @@ shinyUI(fluidPage(
                      selected = "All grades"),
          selectInput("var", label = h4("Select variable",
                                        style = "color:#00A8C9;"),
-                     choices = list("Armspan (in)" = "Armspan_in",
-                                    "Height (in)" = "Height_in",
+                     choices = list("Height (in)" = "Height",
+                                    "Armspan (in)" = "Armspan",
+                                    'Right Foot Length' = 
+                                      'RightFoot',
+                                    'Index Finger Length (mm)' = 
+                                      'IndexFinger',
                                     "Commute Time to School (min)" =
-                                      "TravelTimeSchool",
-                                    "School Night Sleep (hrs)" =
-                                      "SleepHrsSchool",
-                                    "Nonschool Night Sleep (hrs)" =
-                                      "SleepsHrsNonSchool",
-                                    "Number of Occupants in Home" =
-                                      "HomeOccup"),
-                     selected = "Armspan_in"),
+                                      "CommuteTime",
+                                    'Reaction Time (sec)' =
+                                      'ReactionTime',
+                                    'Memory Time (min)' = 'MemoryTime',
+                                    'School Night Sleep (hrs)' =
+                                      'SchoolNight',
+                                    'Nonschool Night Sleep (hrs)' =
+                                      'NonschoolNight',
+                                    'Number of Home Occupants' =
+                                      'HomeOcc'),
+                     selected = "Height"),
          selectInput(inputId = 'type',
                      label = h4("Select Graph", 
                                 style = 'color:#00A8C9;'),
@@ -80,14 +87,20 @@ shinyUI(fluidPage(
             selectInput("vars", label = h4("Select variable",
                                           style = "color:#00A8C9;"),
                         choices = list("Year" = "Year",
+                                       'State' = 'State',
+                                       'Age' = 'Age',
                                        "Transportation to School" = 
-                                         "TransSchool",
+                                         "TransMethod",
                                        "Favorite Physical Activity" =
                                          "FavPhysAct",
+                                       'Birth Month' = 'BirthMonth',
+                                       'Favorite Season' = 'FavSeason',
                                        "Favorite School Subject" =
                                          "FavSubj",
                                        "Planned Education Level" =
-                                         "Planned.Ed.Level"),
+                                         "PlannedEd",
+                                       'Superpower' = 'Superpower',
+                                       'RoleModel' = 'RoleModel'),
                         selected = NULL),
             checkboxInput("gender2", h4("Color Code by Gender",
                                        style = "color:#00A8C9;")),

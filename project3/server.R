@@ -7,7 +7,7 @@ library(cowplot)
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
-  student <- read.csv('data.csv')
+  student <- read.csv('data2.csv')
   getData <- reactive({
     v <- input$grade
     if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
@@ -70,14 +70,14 @@ shinyServer(function(input, output, session) {
       newData <- getData()
       g <- ggplot(newData, aes_string(x = var))
       m <- g + geom_histogram(color = '#FF1493', fill = '#FF1493',
-                              alpha=0.2, bins = 15)
+                              alpha=0.2, bins = 40)
       print(m)
     }
     else if ((v == 2) & input$gender) {
       newData <- getData()
       g <- ggplot(newData, aes_string(x = var))
       m <- g + geom_histogram(aes(color = Gender, fill = Gender),
-                              alpha = 0.2, bins = 15)
+                              alpha = 0.2, bins = 40)
       print(m)
     }
   })
@@ -90,7 +90,7 @@ shinyServer(function(input, output, session) {
       m <- g + 
         geom_bar(color = '#862efd', fill = '#862efd', alpha = 0.2) +
         theme(axis.text.x = 
-                element_text(angle = -45))
+                element_text(angle = -75))
       print(m)
     }
     else if (input$gender2){
@@ -99,11 +99,11 @@ shinyServer(function(input, output, session) {
       f <- ggplot(newDatafem, aes_string(x = vars)) + 
         geom_bar(color = '#F987C5', fill = '#F987C5', alpha = 0.2) + 
         theme(axis.text.x = 
-                element_text(angle = -45))
+                element_text(angle = -75))
       m <- ggplot(newDatamale, aes_string(x = vars)) + 
         geom_bar(color = '#2f4795', fill = '#2f4795', alpha = 0.2) + 
         theme(axis.text.x = 
-                element_text(angle = -45))
+                element_text(angle = -75))
       print(plot_grid(f, m, labels = c('Female', 'Male')))
     }
   })
