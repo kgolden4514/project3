@@ -1,6 +1,8 @@
 library(ggplot2)
 library(shiny)
 library(tidyverse)
+library(scales)
+library(cowplot)
 
 shinyUI(fluidPage(
   navbarPage('Golden Project 3',
@@ -17,9 +19,18 @@ shinyUI(fluidPage(
    navbarMenu('Data Exploration',
      tabPanel('Quantitative',
      # titlePanel('Data Exploration'),
-     titlePanel(uiOutput("title")),
+     titlePanel(uiOutput("quant_title")),
      sidebarLayout(
        sidebarPanel(
+         selectInput(inputId = "grade" ,
+                     label = h4("Select Grade Level",
+                                style = "color:#00A8C9;"),
+                     choices = list('All grades',
+                                    "9th grade" = 9,
+                                    "10th grade" = 10,
+                                    "11th grade" = 11,
+                                    '12th grade' = 12),
+                     selected = "All grades"),
          selectInput("var", label = h4("Select variable",
                                        style = "color:#00A8C9;"),
                      choices = list("Armspan (in)" = "Armspan_in",
@@ -33,22 +44,13 @@ shinyUI(fluidPage(
                                     "Number of Occupants in Home" =
                                       "HomeOccup"),
                      selected = "Armspan_in"),
-         selectInput(inputId = "grade" ,
-                      label = h4("Select Grade Level",
-                                 style = "color:#00A8C9;"),
-                      choices = list('All grades',
-                                  "9th grade" = 9,
-                                  "10th grade" = 10,
-                                  "11th grade" = 11,
-                                  '12th grade' = 12),
-                      selected = "All grades"),
          selectInput(inputId = 'type',
                      label = h4("Select Graph", 
                                 style = 'color:#00A8C9;'),
                      choices = list('Boxplot' = 1,
                                     'Histogram' = 2),
                      selected = 1),
-         checkboxInput("gender", h4("Color Code Gender",
+         checkboxInput("gender", h4("Color Code by Gender",
                                     style = "color:#00A8C9;")),
          selectInput("stat", label = h4("Select statistic",
                                         style = "color:#00A8C9;"),
@@ -63,12 +65,35 @@ shinyUI(fluidPage(
        )
    )),
       tabPanel('Categorical',
+        titlePanel(uiOutput("cat_title")),
         sidebarLayout(
           sidebarPanel(
-                
+            selectInput(inputId = "grade2" ,
+                        label = h4("Select Grade Level",
+                                   style = "color:#00A8C9;"),
+                        choices = list('All grades',
+                                       "9th grade" = 9,
+                                       "10th grade" = 10,
+                                       "11th grade" = 11,
+                                       '12th grade' = 12),
+                        selected = "All grades"),
+            selectInput("vars", label = h4("Select variable",
+                                          style = "color:#00A8C9;"),
+                        choices = list("Year" = "Year",
+                                       "Transportation to School" = 
+                                         "TransSchool",
+                                       "Favorite Physical Activity" =
+                                         "FavPhysAct",
+                                       "Favorite School Subject" =
+                                         "FavSubj",
+                                       "Planned Education Level" =
+                                         "Planned.Ed.Level"),
+                        selected = NULL),
+            checkboxInput("gender2", h4("Color Code by Gender",
+                                       style = "color:#00A8C9;")),
               ),
            mainPanel(
-                
+             plotOutput('cat_graph')    
               )
     ))),
    

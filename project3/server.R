@@ -2,6 +2,8 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
+library(scales)
+library(cowplot)
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
@@ -15,7 +17,37 @@ shinyServer(function(input, output, session) {
     newData <- student
     }
   })
-
+  
+  getData2 <- reactive({
+    v <- input$grade2
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+      newData2 <- student %>% filter(Grade == v)
+    }
+    else if (v == "All grades") {
+      newData2 <- student
+    }
+  })
+  
+  getDatafem <- reactive({
+    v <- input$grade2
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+      newDatafem <- student %>% filter(Grade == v & Gender == 'Female')
+    }
+    else if (v == "All grades") {
+      newDatafem <- student %>% filter(Gender == 'Female')
+    }
+  })
+  
+  getDatamale <- reactive({
+    v <- input$grade2
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+      newDatamale <- student %>% filter(Grade == v & Gender == 'Male')
+    }
+    else if (v == "All grades") {
+      newDatamale <- student %>% filter(Gender == 'Male')
+    }
+  })
+  
   output$graph <- renderPlot({
     v <- input$type
     newData <- getData()
@@ -49,9 +81,35 @@ shinyServer(function(input, output, session) {
       print(m)
     }
   })
+  
+  output$cat_graph <- renderPlot({
+    vars <- input$vars
+    if (!input$gender2){
+      newData2 <- getData2()
+      g <- ggplot(newData2, aes_string(x = vars))
+      m <- g + 
+        geom_bar(color = '#862efd', fill = '#862efd', alpha = 0.2) +
+        theme(axis.text.x = 
+                element_text(angle = -45))
+      print(m)
+    }
+    else if (input$gender2){
+      newDatafem <- getDatafem()
+      newDatamale <- getDatamale()
+      f <- ggplot(newDatafem, aes_string(x = vars)) + 
+        geom_bar(color = '#F987C5', fill = '#F987C5', alpha = 0.2) + 
+        theme(axis.text.x = 
+                element_text(angle = -45))
+      m <- ggplot(newDatamale, aes_string(x = vars)) + 
+        geom_bar(color = '#2f4795', fill = '#2f4795', alpha = 0.2) + 
+        theme(axis.text.x = 
+                element_text(angle = -45))
+      print(plot_grid(f, m, labels = c('Female', 'Male')))
+    }
+  })
 
   #Update title
-  output$title <- renderUI({
+  output$quant_title <- renderUI({
     v <- input$grade
     var <- input$var
     if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
@@ -61,7 +119,19 @@ shinyServer(function(input, output, session) {
     paste0('Investigation of all grades quantitative variables')
     }
   })
-
+  
+  #Update title
+  output$cat_title <- renderUI({
+    v <- input$grade2
+    var <- input$var
+    if ((v == 9 | 10 | 11 | 12) & v != "All grades") {
+      paste0('Investigation of ', v, 'th graders categorical variables')
+    }
+    else if (v == "All grades"){
+      paste0('Investigation of all grades categorical variables')
+    }
+  })
+  
   output$table <- renderDataTable({
     var <- input$var
     stat <- input$stat
@@ -78,4 +148,6 @@ shinyServer(function(input, output, session) {
                 round,
                 digits = 2)
   })
+  
+  
 })
