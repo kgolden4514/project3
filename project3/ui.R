@@ -128,7 +128,7 @@ shinyUI(fluidPage(
        sidebarPanel(
          textInput("prop", label = h4("Enter data partition 
                                       proportion"),
-                   value = 'Must be [0,1]'),
+                   value = 'Must be (0,1)'),
        ),
        mainPanel(
          
