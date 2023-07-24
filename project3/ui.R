@@ -3,6 +3,7 @@ library(shiny)
 library(tidyverse)
 library(scales)
 library(cowplot)
+library(knitr)
 
 shinyUI(fluidPage(
   navbarPage('Golden Project 3',
@@ -106,7 +107,8 @@ shinyUI(fluidPage(
                                        style = "color:#00A8C9;")),
               ),
            mainPanel(
-             plotOutput('cat_graph')    
+             plotOutput('cat_graph'),
+             verbatimTextOutput('kable')
               )
     ))),
    
