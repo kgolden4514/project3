@@ -5,6 +5,7 @@ library(tidyverse)
 library(scales)
 library(cowplot)
 library(knitr)
+library(caret)
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
@@ -188,6 +189,18 @@ shinyServer(function(input, output, session) {
 
 #Model fitting
 
+  #Create data partition
+  getData <- reactive({
+    p <- input$prop
+    #for reproducability
+    set.seed(111)
+    #indices to split on
+    train <- sample(1:nrow(student), size = nrow(student)*p)
+    test <- dplyr::setdiff(1:nrow(student), train)
+    #subset
+    studentTrain <- student[train, ]
+    studentTest <- student[test, ]
+  })
 #Prediction
   
 })

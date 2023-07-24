@@ -4,6 +4,7 @@ library(tidyverse)
 library(scales)
 library(cowplot)
 library(knitr)
+library(caret)
 
 shinyUI(fluidPage(
   navbarPage('Golden Project 3',
@@ -125,7 +126,9 @@ shinyUI(fluidPage(
    tabPanel('Model Fitting',
      sidebarLayout(
        sidebarPanel(
-         
+         textInput("prop", label = h4("Enter data partition 
+                                      proportion"),
+                   value = 'Must be [0,1]'),
        ),
        mainPanel(
          
