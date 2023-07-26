@@ -5,20 +5,33 @@ library(scales)
 library(cowplot)
 library(knitr)
 library(caret)
+library(randomForest)
+library(shinydashboard)
+library(shinycssloaders)
+library(maps)
+library(leaflet)
+library(plotly)
+library(corrplot)
+library(stargazer)
+library(shinythemes)
+library(recipes)
 
-shinyUI(fluidPage(
+shinyUI(fluidPage(theme = shinytheme("cyborg"),
   navbarPage('Golden Project 3',
-      tabPanel('About',
+#Code for About Page ---------------------------------------------------------     
+    tabPanel('About',
       titlePanel('About'),
       sidebarLayout(
         sidebarPanel(
 
         ),
         mainPanel(
-          
+
         )
    )),
+#Code for Data Exploration ----------------------------------------------------
    navbarMenu('Data Exploration',
+#Code for Quantitative---------------------------------------------------------
      tabPanel('Quantitative',
      # titlePanel('Data Exploration'),
      titlePanel(uiOutput("quant_title")),
@@ -37,9 +50,9 @@ shinyUI(fluidPage(
                                        style = "color:#00A8C9;"),
                      choices = list("Height (in)" = "Height",
                                     "Armspan (in)" = "Armspan",
-                                    'Right Foot Length' = 
+                                    'Right Foot Length' =
                                       'RightFoot',
-                                    'Index Finger Length (mm)' = 
+                                    'Index Finger Length (mm)' =
                                       'IndexFinger',
                                     "Commute Time to School (min)" =
                                       "CommuteTime",
@@ -54,7 +67,7 @@ shinyUI(fluidPage(
                                       'HomeOcc'),
                      selected = "Height"),
          selectInput(inputId = 'type',
-                     label = h4("Select Graph", 
+                     label = h4("Select Graph",
                                 style = 'color:#00A8C9;'),
                      choices = list('Boxplot' = 1,
                                     'Histogram' = 2),
@@ -73,6 +86,7 @@ shinyUI(fluidPage(
           dataTableOutput('table')
        )
    )),
+#Code for Categorical---------------------------------------------------------
       tabPanel('Categorical',
         titlePanel(uiOutput("cat_title")),
         sidebarLayout(
@@ -91,7 +105,7 @@ shinyUI(fluidPage(
                         choices = list("Year" = "Year",
                                        'State' = 'State',
                                        'Age' = 'Age',
-                                       "Transportation to School" = 
+                                       "Transportation to School" =
                                          "TransMethod",
                                        "Favorite Physical Activity" =
                                          "FavPhysAct",
@@ -112,8 +126,9 @@ shinyUI(fluidPage(
              verbatimTextOutput('kable')
               )
     ))),
-   
+#Code for Modeling--------------------------------------------------------------
    navbarMenu('Modeling',
+#Code for Modeling Info---------------------------------------------------------
    tabPanel('Modeling Info',
      sidebarLayout(
        sidebarPanel(
@@ -123,34 +138,77 @@ shinyUI(fluidPage(
 
       )
    )),
+#Code for Fitting--------------------------------------------------------------
    tabPanel('Model Fitting',
+     titlePanel('Model Fitting'),
      sidebarLayout(
        sidebarPanel(
-         textInput("prop", label = h4("Enter data partition 
-                                      proportion"),
-                   value = 'Must be (0,1)'),
+         sliderInput(
+           "Slider1",
+           label = h6("Train/Test Split %"),
+           min = 0,
+           max = 100,
+           value = 75),
+         textOutput("cntTrain"),
+         textOutput("cntTest"),
+         checkboxGroupInput("SelectX",
+                            label = h6("Select variables:"),
+                            choices = names(student),
+                            selected = names(student)),
+         # selectInput(inputId = "SelectX", 
+         #             label = "Independent Variables", 
+         #             multiple = TRUE, 
+         #             choices = as.list(names(student)), 
+         #             selected = names(student)[1]),
+         # verbatimTextOutput(outputId = "RegOut"),
+         selectInput("SelectY", 
+                     label = "Select variable to predict:", 
+                     choices = names(student)),
+         
        ),
        mainPanel(
-         
+         tabBox(
+           id = "tabset1",
+           height = "1000px",
+           width = 12,
+           tabPanel(
+             "Data Summary",
+             box(withSpinner(verbatimTextOutput("Summ")), width = 6),
+             box(withSpinner(verbatimTextOutput("Summ_old")), width = 6)),
+           tabPanel("Plots",
+                    box(withSpinner(plotOutput(
+                      "Corr")), width = 12))
+         ),
        )
     )),
+#Code for Prediction-----------------------------------------------------------
    tabPanel('Prediction',
      sidebarLayout(
        sidebarPanel(
-         
+
        ),
        mainPanel(
-         
+
        )
      ))),
+#Code for Data-----------------------------------------------------------------
    tabPanel('Data',
      titlePanel('Data'),
      sidebarLayout(
        sidebarPanel(
-         
+
        ),
        mainPanel(
-         
+         tabBox(
+           id = "tabset1",
+           height = "1000px",
+           width = 12,
+           
+           tabPanel("Data",
+                    box(withSpinner(dataTableOutput(
+                      "Data"
+                    )), width = 12))),
+
        )
    ))
 )))

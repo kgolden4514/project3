@@ -6,13 +6,31 @@ library(scales)
 library(cowplot)
 library(knitr)
 library(caret)
+library(randomForest)
+library(shinydashboard)
+library(shinycssloaders)
+library(maps)
+library(leaflet)
+library(plotly)
+library(corrplot)
+library(stargazer)
+library(shinythemes)
+library(recipes)
+
+setwd("C:/Documents/Github/project3")
+student <- read.csv('data2.csv')
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
   student <- read.csv('data2.csv')
+  student <- student[ , -c(24,25)]
+  student$Year <- as.character(student$Year)
+  dd <- student
+
+#Code for About----------------------------------------------------------------
   
-#Data Exploration Quantitative
-  
+    
+#Code for Quantitative---------------------------------------------------------
   #Update quantitative title
   output$quant_title <- renderUI({
     v <- input$grade
@@ -89,7 +107,7 @@ shinyServer(function(input, output, session) {
                 digits = 2)
   })
   
-#Data Exploration Categorical
+#Code for Categorical---------------------------------------------------------
   
   #Update categorical title
   output$cat_title <- renderUI({
@@ -185,22 +203,100 @@ shinyServer(function(input, output, session) {
     }
   })
   
-#Modeling Info
+#Code for Modeling Info---------------------------------------------------------
+  
 
-#Model fitting
+#Code for Model Fitting---------------------------------------------------------
+    InputDataset <- reactive({
+      student
+    })
+    
+    inputDataSetNum <- reactive({
+      student[ , -c(1, 3:4, 10, 14:17, 21:23)]
+    })
+    
+    InputDataset_model <- reactive({
+      if (is.null(input$SelectX)) {
+        dt <- student
+      }
+      else{
+        dt <- student[, c(input$SelectX)]
+      }
+    })
+    
+    observe({
+      lstname <- names(InputDataset())
+      updateSelectInput(session = session,
+                        inputId = "SelectY",
+                        choices = lstname)
+    })
+    
+    splitSlider <- reactive({
+      input$Slider1 / 100
+    })
+    
+    set.seed(100)  # setting seed to reproduce results of random sampling
+    trainingRowIndex <-
+      reactive({
+        sample(1:nrow(InputDataset_model()),
+               splitSlider() * nrow(InputDataset_model()))
+      })# row indices for training data
+    
+    trainingData <- reactive({
+      tmptraindt <- InputDataset_model()
+      tmptraindt[trainingRowIndex(), ]
+    })
+    
+    testData <- reactive({
+      tmptestdt <- InputDataset_model()
+      tmptestdt[-trainingRowIndex(),]
+    })
+    
+    output$cntTrain <-
+      renderText(paste("Train Data:", nrow(trainingData()), "records"))
+    output$cntTest <-
+      renderText(paste("Test Data:", nrow(testData()), "records"))
+    
+    output$Data <- renderDataTable(InputDataset())
+    
+    output$Summ <-
+      renderPrint(
+        stargazer(
+          InputDataset(),
+          type = "text",
+          title = "Descriptive statistics",
+          digits = 1,
+          out = "table1.txt"
+        )
+      )
+    
+    output$Summ_old <- renderPrint(summary(InputDataset()))
+    output$structure <- renderPrint(str(InputDataset()))
+    
+    cormat <- reactive({
+     a <- round(cor(inputDataSetNum()), 1)
+    })
+    
+    output$Corr <-
+      renderPlot(corrplot(
+        cormat(),
+        type = "lower",
+        order = "hclust",
+        method = "number"))
 
-  #Create data partition
-  getData <- reactive({
-    p <- input$prop
-    #for reproducability
-    set.seed(111)
-    #indices to split on
-    train <- sample(1:nrow(student), size = nrow(student)*p)
-    test <- dplyr::setdiff(1:nrow(student), train)
-    #subset
-    studentTrain <- student[train, ]
-    studentTest <- student[test, ]
-  })
+#Code for inear regression---------------------------------------------------------
+    
+    # recipe_formula <- reactive(trainingData %>%
+    #   recipe() %>%
+    #     update_role(input$SelectY,new_role = "outcome") %>%
+    #       update_role(!!!input$SelectX,new_role = "predictor") %>% 
+    #         formula())
+    # 
+    # lm_reg <- reactive(
+    #   lm(recipe_formula(), data = trainingData)
+    # )
+    # 
+    # output$RegOut = renderPrint({summary(lm_reg())})
 #Prediction
   
 })
