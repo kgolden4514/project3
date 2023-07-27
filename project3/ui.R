@@ -17,198 +17,116 @@ library(shinythemes)
 library(recipes)
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
-  navbarPage('Golden Project 3',
+navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
-    tabPanel('About',
-      titlePanel('About'),
-      sidebarLayout(
-        sidebarPanel(
+tabPanel('About',
+  titlePanel('About'),
+  sidebarLayout(
+  sidebarPanel(),
+  mainPanel()
+  )),
+navbarMenu('Data Exploration',
+  tabPanel('Quantitative',
+    titlePanel(uiOutput('title')),
+    sidebarLayout(
+    sidebarPanel(
+      selectInput('dec', 'Choose Decade', selected = "All Decades",
+                  choices = list('All Decades',
+                                 '1900s',
+                                 '1910s',
+                                 '1920s',
+                                 '1930s',
+                                 '1940s',
+                                 '1950s',
+                                 '1960s',
+                                 '1970s',
+                                 '1980s',
+                                 '1990s',
+                                 '2000s')),
+      selectInput('quant', 'Choose Quantitative Variable', selected = 'price',
+                  choices = list('Price' = 'price',
+                                 '# of Bedrooms' = 'bedrooms',
+                                 '# of Bathrooms' = 'bathrooms',
+                                 'Living Space (sqft)' = 'sqftLiving',
+                                 'Lot Space (sqft)' = 'sqftLot',
+                                 '# of Floors' = 'floors')),
+      checkboxInput('year', 'Color Code by Year Note: All Decades will code 
+                    by Decade'),
+      selectInput('type', 'Choose graph type', selected = 1,
+                  choices = list('Boxplot' = 1,
+                                 'Histogram' = 2)),
+      selectInput('stat', 'Choose the Statistic', selected = 'mean',
+                  choices = list('Mean' = 'mean',
+                                 'Median' = 'median',
+                                 'Standard Deviation' = 'sd')),
+    ),
+    mainPanel(
+      plotOutput('graph'),
+      dataTableOutput('quantTable')
+    )
+  )),
+  tabPanel('Categorical',
+    titlePanel(uiOutput('title2')),
+    sidebarLayout(
+    sidebarPanel(
+      selectInput('dec2', 'Choose Decade', selected = "1900s",
+                  choices = list('1900s',
+                                 '1910s',
+                                 '1920s',
+                                 '1930s',
+                                 '1940s',
+                                 '1950s',
+                                 '1960s',
+                                 '1970s',
+                                 '1980s',
+                                 '1990s',
+                                 '2000s')),
+      selectInput('cat', 'Choose Variables', selected = 'waterfrontYN',
+                  choices = list('Waterfront'= 'waterfrontYN',
+                                 'Basement' = 'basementYN',
+                                 'Renovated' = 'renovatedYN')),
+      checkboxInput('year2', 'Color Code by Year Note: All Decades will code 
+                    by Decade'),
+    ),
+    mainPanel(
+      plotOutput('catGraph'),
+      verbatimTextOutput('kable')
+    )
+  )),
+  tabPanel('EDA',
+    titlePanel('EDA'),
+    sidebarLayout(
+    sidebarPanel(),
+    mainPanel()
+  ))
+),
 
-        ),
-        mainPanel(
-
-        )
-   )),
-#Code for Data Exploration ----------------------------------------------------
-   navbarMenu('Data Exploration',
-#Code for Quantitative---------------------------------------------------------
-     tabPanel('Quantitative',
-     # titlePanel('Data Exploration'),
-     titlePanel(uiOutput("quant_title")),
-     sidebarLayout(
-       sidebarPanel(
-         selectInput(inputId = "grade" ,
-                     label = h4("Select Grade Level",
-                                style = "color:#00A8C9;"),
-                     choices = list('All grades',
-                                    "9th grade" = 9,
-                                    "10th grade" = 10,
-                                    "11th grade" = 11,
-                                    '12th grade' = 12),
-                     selected = "All grades"),
-         selectInput("var", label = h4("Select variable",
-                                       style = "color:#00A8C9;"),
-                     choices = list("Height (in)" = "Height",
-                                    "Armspan (in)" = "Armspan",
-                                    'Right Foot Length' =
-                                      'RightFoot',
-                                    'Index Finger Length (mm)' =
-                                      'IndexFinger',
-                                    "Commute Time to School (min)" =
-                                      "CommuteTime",
-                                    'Reaction Time (sec)' =
-                                      'ReactionTime',
-                                    'Memory Time (min)' = 'MemoryTime',
-                                    'School Night Sleep (hrs)' =
-                                      'SchoolNight',
-                                    'Nonschool Night Sleep (hrs)' =
-                                      'NonschoolNight',
-                                    'Number of Home Occupants' =
-                                      'HomeOcc'),
-                     selected = "Height"),
-         selectInput(inputId = 'type',
-                     label = h4("Select Graph",
-                                style = 'color:#00A8C9;'),
-                     choices = list('Boxplot' = 1,
-                                    'Histogram' = 2),
-                     selected = 1),
-         checkboxInput("gender", h4("Color Code by Gender",
-                                    style = "color:#00A8C9;")),
-         selectInput("stat", label = h4("Select statistic",
-                                        style = "color:#00A8C9;"),
-                     choices = list("Median" = "median",
-                                    "Mean" = 'mean',
-                                    "Standard Deviation" = "sd"),
-                     selected = "median"),
-       ),
-        mainPanel(
-          plotOutput('graph'),
-          dataTableOutput('table')
-       )
-   )),
-#Code for Categorical---------------------------------------------------------
-      tabPanel('Categorical',
-        titlePanel(uiOutput("cat_title")),
-        sidebarLayout(
-          sidebarPanel(
-            selectInput(inputId = "grade2" ,
-                        label = h4("Select Grade Level",
-                                   style = "color:#00A8C9;"),
-                        choices = list('All grades',
-                                       "9th grade" = 9,
-                                       "10th grade" = 10,
-                                       "11th grade" = 11,
-                                       '12th grade' = 12),
-                        selected = "All grades"),
-            selectInput("vars", label = h4("Select variable",
-                                          style = "color:#00A8C9;"),
-                        choices = list("Year" = "Year",
-                                       'State' = 'State',
-                                       'Age' = 'Age',
-                                       "Transportation to School" =
-                                         "TransMethod",
-                                       "Favorite Physical Activity" =
-                                         "FavPhysAct",
-                                       'Birth Month' = 'BirthMonth',
-                                       'Favorite Season' = 'FavSeason',
-                                       "Favorite School Subject" =
-                                         "FavSubj",
-                                       "Planned Education Level" =
-                                         "PlannedEd",
-                                       'Superpower' = 'Superpower',
-                                       'RoleModel' = 'RoleModel'),
-                        selected = NULL),
-            checkboxInput("gender2", h4("Color Code by Gender",
-                                       style = "color:#00A8C9;")),
-              ),
-           mainPanel(
-             plotOutput('cat_graph'),
-             verbatimTextOutput('kable')
-              )
-    ))),
-#Code for Modeling--------------------------------------------------------------
-   navbarMenu('Modeling',
-#Code for Modeling Info---------------------------------------------------------
-   tabPanel('Modeling Info',
-     sidebarLayout(
-       sidebarPanel(
-
-       ),
-      mainPanel(
-
-      )
-   )),
-#Code for Fitting--------------------------------------------------------------
-   tabPanel('Model Fitting',
-     titlePanel('Model Fitting'),
-     sidebarLayout(
-       sidebarPanel(
-         sliderInput(
-           "Slider1",
-           label = h6("Train/Test Split %"),
-           min = 0,
-           max = 100,
-           value = 75),
-         textOutput("cntTrain"),
-         textOutput("cntTest"),
-         checkboxGroupInput("SelectX",
-                            label = h6("Select variables:"),
-                            choices = names(student),
-                            selected = names(student)),
-         # selectInput(inputId = "SelectX", 
-         #             label = "Independent Variables", 
-         #             multiple = TRUE, 
-         #             choices = as.list(names(student)), 
-         #             selected = names(student)[1]),
-         # verbatimTextOutput(outputId = "RegOut"),
-         selectInput("SelectY", 
-                     label = "Select variable to predict:", 
-                     choices = names(student)),
-         
-       ),
-       mainPanel(
-         tabBox(
-           id = "tabset1",
-           height = "1000px",
-           width = 12,
-           tabPanel(
-             "Data Summary",
-             box(withSpinner(verbatimTextOutput("Summ")), width = 6),
-             box(withSpinner(verbatimTextOutput("Summ_old")), width = 6)),
-           tabPanel("Plots",
-                    box(withSpinner(plotOutput(
-                      "Corr")), width = 12))
-         ),
-       )
-    )),
-#Code for Prediction-----------------------------------------------------------
-   tabPanel('Prediction',
-     sidebarLayout(
-       sidebarPanel(
-
-       ),
-       mainPanel(
-
-       )
-     ))),
-#Code for Data-----------------------------------------------------------------
-   tabPanel('Data',
-     titlePanel('Data'),
-     sidebarLayout(
-       sidebarPanel(
-
-       ),
-       mainPanel(
-         tabBox(
-           id = "tabset1",
-           height = "1000px",
-           width = 12,
-           
-           tabPanel("Data",
-                    box(withSpinner(dataTableOutput(
-                      "Data"
-                    )), width = 12))),
-
-       )
-   ))
+navbarMenu('Modeling',
+  tabPanel('Model Info',
+  titlePanel('Model Info'),
+  sidebarLayout(
+  sidebarPanel(),
+  mainPanel()
+  )),
+  tabPanel('Model Fitting',
+    titlePanel('Model Fitting'),
+    sidebarLayout(
+    sidebarPanel(),
+    mainPanel()
+  )),
+  tabPanel('Prediction',
+  titlePanel('Prediction'),
+  sidebarLayout(
+  sidebarPanel(),
+  mainPanel()
+  )),
+),
+tabPanel('Data',
+titlePanel('Prediction'),
+sidebarLayout(
+sidebarPanel(),
+mainPanel()
+)),
 )))
+  
+  
