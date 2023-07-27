@@ -111,7 +111,25 @@ navbarMenu('Modeling',
   tabPanel('Model Fitting',
     titlePanel('Model Fitting'),
     sidebarLayout(
-    sidebarPanel(),
+    sidebarPanel(
+      sliderInput(
+        "Slider1", "Train/Test Split %", min = 0, max = 100, value = 75),
+      textOutput("cntTrain"),
+      textOutput("cntTest"),
+      selectInput("class", 
+                  label = "Select classification or regression", 
+                  choices = list('Regression' = 'reg',
+                                 'Classification' = 'class'),
+                  selected = 'reg'),
+      selectInput(inputId = "SelectX",
+                  label = "Independent Variables",
+                  multiple = TRUE,
+                  choices = list(
+                    
+                  ),
+                  selected = names(student)[1]),
+      actionButton("fit", label = "Fit"),
+    ),
     mainPanel()
   )),
   tabPanel('Prediction',

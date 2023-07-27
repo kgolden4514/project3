@@ -20,11 +20,25 @@ library(recipes)
 setwd("C:/Documents/Github/project3")
 house <- read.csv('house.csv')
 house$yrBuilt <- as.character(house$yrBuilt)
+house$zipcode <- as.character(house$zipcode)
+house$renovatedFac <- as.factor(house$renovatedYN)
+house$basementFac<- as.factor(house$basementYN)
+house$waterfrontFac <- as.factor(house$waterfrontYN)
+house$yrBuiltFac <- as.factor(house$yrBuilt)
+house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+house$zipcodeFac <- as.factor(house$zipcode)
 
 shinyServer(function(input, output, session) {
-setwd('C:/Documents/Github/project3')
-house <- read.csv('house.csv')
-house$yrBuilt <- as.character(house$yrBuilt)
+  setwd("C:/Documents/Github/project3")
+  house <- read.csv('house.csv')
+  house$yrBuilt <- as.character(house$yrBuilt)
+  house$zipcode <- as.character(house$zipcode)
+  house$renovatedFac <- as.factor(house$renovatedYN)
+  house$basementFac<- as.factor(house$basementYN)
+  house$waterfrontFac <- as.factor(house$waterfrontYN)
+  house$yrBuiltFac <- as.factor(house$yrBuilt)
+  house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+  house$zipcodeFac <- as.factor(house$zipcode)
 
 #Create datasets
 #_______________________________________________________________________________________________________
@@ -50,6 +64,22 @@ getDatadec2 <- reactive({
   else if (v == 'All Decades') {
     newData2 <- house
   }
+})
+
+set.seed(100)  # setting seed to reproduce results of random sampling
+trainingRowIndex <-reactive({
+  sample(1:nrow(getData()),
+           splitSlider() * nrow(getData()))
+  })# row indices for training data
+
+trainingData <- reactive({
+  tmptraindt <- getData()
+  tmptraindt[trainingRowIndex(), ]
+})
+
+testData <- reactive({
+  tmptestdt <- getData()
+  tmptestdt[-trainingRowIndex(),]
 })
 
 #Create quantitative outputs
@@ -123,7 +153,6 @@ output$title <- renderUI({
 })
 #Create Categorical Outputs
 #______________________________________________________________________________________________________
-#
 output$title2 <- renderUI({
   v <- input$dec2
   var <- input$cat
@@ -177,7 +206,34 @@ output$kable <- renderPrint ({
   }
 })
 
+#Create Model Fitting
+#______________________________________________________________________________________________________
+splitSlider <- reactive({
+  input$Slider1 / 100
+})
 
+output$cntTrain <-
+  renderText(paste("Train Data:", nrow(trainingData()), "records"))
+output$cntTest <-
+  renderText(paste("Test Data:", nrow(testData()), "records"))
+
+output$class <- renderUI ({
+  if (input$class == 'class') {
+    selectInput('response', 'Choose response',
+                choice = list('Waterfront' = 'waterfrontYN',
+                              'Basement' = 'basementYN',
+                              'Year Built' = 'yrBuilt',
+                              'Decade Built' = 'decadeBuilt',
+                              'Renovated' = 'renovatedYN',
+                              'Zipcode' = 'zipcode'),
+                selected = 'waterfrontYN')
+  if (input$class == 'reg') {
+    selectInput('response', 'Choose response',
+                choice = list('Price' = 'price',
+                              '#'))
+  }
+  }
+})
 #End function
 #_______________________________________________________________________________________________________
 })
