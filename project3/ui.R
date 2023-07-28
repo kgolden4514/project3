@@ -15,6 +15,9 @@ library(corrplot)
 library(stargazer)
 library(shinythemes)
 library(recipes)
+library(GGally)
+library(corrplot)
+library(htmltools)
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
@@ -26,7 +29,7 @@ tabPanel('About',
   mainPanel()
   )),
 navbarMenu('Data Exploration',
-  tabPanel('Quantitative',
+  tabPanel('Variables',
     titlePanel(uiOutput('title')),
     sidebarLayout(
     sidebarPanel(
@@ -43,73 +46,62 @@ navbarMenu('Data Exploration',
                                  '1980s',
                                  '1990s',
                                  '2000s')),
-      selectInput('quant', 'Choose Quantitative Variable', selected = 'price',
-                  choices = list('Price' = 'price',
-                                 '# of Bedrooms' = 'bedrooms',
-                                 '# of Bathrooms' = 'bathrooms',
-                                 'Living Space (sqft)' = 'sqftLiving',
-                                 'Lot Space (sqft)' = 'sqftLot',
-                                 '# of Floors' = 'floors')),
+      selectInput('quantCat', 'Choose a variable type',
+                  choices = list('Quantitative',
+                                 'Categorical')),
+      uiOutput('vars'),
+      uiOutput('type'),
       checkboxInput('year', 'Color Code by Year Note: All Decades will code 
                     by Decade'),
-      selectInput('type', 'Choose graph type', selected = 1,
-                  choices = list('Boxplot' = 1,
-                                 'Histogram' = 2)),
-      selectInput('stat', 'Choose the Statistic', selected = 'mean',
-                  choices = list('Mean' = 'mean',
-                                 'Median' = 'median',
-                                 'Standard Deviation' = 'sd')),
+      uiOutput('statchoice'),
     ),
     mainPanel(
       plotOutput('graph'),
-      dataTableOutput('quantTable')
+      uiOutput('quantTabley'),
+      uiOutput('kabley')
     )
   )),
-  tabPanel('Categorical',
-    titlePanel(uiOutput('title2')),
-    sidebarLayout(
-    sidebarPanel(
-      selectInput('dec2', 'Choose Decade', selected = "1900s",
-                  choices = list('1900s',
-                                 '1910s',
-                                 '1920s',
-                                 '1930s',
-                                 '1940s',
-                                 '1950s',
-                                 '1960s',
-                                 '1970s',
-                                 '1980s',
-                                 '1990s',
-                                 '2000s')),
-      selectInput('cat', 'Choose Variables', selected = 'waterfrontYN',
-                  choices = list('Waterfront'= 'waterfrontYN',
-                                 'Basement' = 'basementYN',
-                                 'Renovated' = 'renovatedYN')),
-      checkboxInput('year2', 'Color Code by Year Note: All Decades will code 
-                    by Decade'),
-    ),
-    mainPanel(
-      plotOutput('catGraph'),
-      verbatimTextOutput('kable')
-    )
-  )),
-  tabPanel('EDA',
-    titlePanel('EDA'),
-    sidebarLayout(
-    sidebarPanel(),
-    mainPanel()
-  ))
-),
+  
+tabPanel('EDA',
+titlePanel('EDA'),
+  sidebarLayout(
+  sidebarPanel(
+    selectInput('resp', 'Choose response',
+                choices = list('Price' = 'price',
+                               '# of Bedrooms' = 'bedrooms',
+                               '# of Bathrooms' = 'bathrooms',
+                               'Living Space (sqft)' = 'sqftLiving',
+                               'Lot Space (sqft)' = 'sqftLot',
+                               '# of Floors' = 'floors',
+                               'Waterfront'= 'waterfrontYN',
+                               'Basement' = 'basementYN',
+                               'Renovated' = 'renovatedYN')),
+   ),
+  mainPanel(tabBox(
+           id = "tabset1",
+           height = "1000px",
+           width = 12,
+           tabPanel(
+             "Data Summary",
+             box(withSpinner(verbatimTextOutput('ysum')), title = 'Summary of Response', width = 6)
+             ),
+           tabPanel(
+             "Plots",
+             box(withSpinner(plotOutput('ggp'))),
+             box(withSpinner(plotOutput('corrp')))
+           ),
+   )
+)))),
 
 navbarMenu('Modeling',
   tabPanel('Model Info',
-  titlePanel('Model Info'),
-  sidebarLayout(
-  sidebarPanel(),
-  mainPanel()
+    titlePanel('Model Info'),
+    sidebarLayout(
+    sidebarPanel(),
+    mainPanel()
   )),
-  tabPanel('Model Fitting',
-    titlePanel('Model Fitting'),
+tabPanel('Model Fitting',
+  titlePanel('Model Fitting'),
     sidebarLayout(
     sidebarPanel(
       sliderInput(
@@ -119,18 +111,25 @@ navbarMenu('Modeling',
       selectInput("class", 
                   label = "Select classification or regression", 
                   choices = list('Regression' = 'reg',
-                                 'Classification' = 'class'),
-                  selected = 'reg'),
-      selectInput(inputId = "SelectX",
-                  label = "Independent Variables",
-                  multiple = TRUE,
-                  choices = list(
-                    
-                  ),
-                  selected = names(student)[1]),
-      actionButton("fit", label = "Fit"),
+                                 'Classification' = 'class')),
+      uiOutput('y'),
+      uiOutput('x'),
+      actionButton("action", label = "Begin Fits"),
     ),
-    mainPanel()
+    mainPanel((tabBox(
+      id = "tabset1",
+      height = "1000px",
+      width = 12,
+      tabPanel('Fit Statistics',
+               
+      ),
+      tabPanel("Summaries",
+        box(withSpinner(verbatimTextOutput('loglinsum')))
+      ),
+      tabPanel("Plots",
+      )
+    )
+    )
   )),
   tabPanel('Prediction',
   titlePanel('Prediction'),
@@ -140,11 +139,11 @@ navbarMenu('Modeling',
   )),
 ),
 tabPanel('Data',
-titlePanel('Prediction'),
+titlePanel('Data'),
 sidebarLayout(
 sidebarPanel(),
 mainPanel()
 )),
-)))
+))))
   
   

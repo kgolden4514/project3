@@ -16,10 +16,12 @@ library(corrplot)
 library(stargazer)
 library(shinythemes)
 library(recipes)
+library(GGally)
+library(corrplot)
+library(htmltools)
 
 setwd("C:/Documents/Github/project3")
 house <- read.csv('house.csv')
-house$yrBuilt <- as.character(house$yrBuilt)
 house$zipcode <- as.character(house$zipcode)
 house$renovatedFac <- as.factor(house$renovatedYN)
 house$basementFac<- as.factor(house$basementYN)
@@ -31,7 +33,6 @@ house$zipcodeFac <- as.factor(house$zipcode)
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
   house <- read.csv('house.csv')
-  house$yrBuilt <- as.character(house$yrBuilt)
   house$zipcode <- as.character(house$zipcode)
   house$renovatedFac <- as.factor(house$renovatedYN)
   house$basementFac<- as.factor(house$basementYN)
@@ -83,127 +84,196 @@ testData <- reactive({
 })
 
 #Create quantitative outputs
-#_______________________________________________________________________________________________________
+#______________________________________________________________________________________________________
+output$vars <- renderUI ({
+  if (input$quantCat == 'Quantitative') {
+    selectInput('var', 'Choose Quantitative Variable',
+                choices = list('Price' = 'price',
+                               '# of Bedrooms' = 'bedrooms',
+                               '# of Bathrooms' = 'bathrooms',
+                               'Living Space (sqft)' = 'sqftLiving',
+                               'Lot Space (sqft)' = 'sqftLot',
+                               '# of Floors' = 'floors'))
+  }
+  else if (input$quantCat == 'Categorical') {
+    selectInput('var', 'Choose Variables',
+                choices = list('Waterfront'= 'waterfrontYN',
+                               'Basement' = 'basementYN',
+                               'Renovated' = 'renovatedYN'))
+  }
+})
+
+output$type <- renderUI ({
+  if (input$quantCat == 'Quantitative') {
+    selectInput('type', 'Choose graph type',
+                choices = list('boxplot' = 1,
+                               'histogram' = 2))
+  }
+})
+
 output$graph <- renderPlot ({
   type <- input$type
-  var <- input$quant
+  var <- input$var
   dec <- input$dec
   newData <- getDatadec()
   g <- ggplot(newData, aes_string(x = var))
   if ((type == 1) &  !input$year) {
+    newData <- getDatadec()
     m <- g + geom_boxplot(color = '#FF1493', fill = '#FF1493', alpha = 0.2) +
       coord_flip()
     print(m)
   }
   else if ((type == 1) & input$year & dec != "All Decades") {
+    newData <- getDatadec()
     m <- g + geom_boxplot(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2) + 
       coord_flip()
     print(m)
   }
   else if ((type == 1) & input$year & dec == "All Decades") {
+    newData <- getDatadec()
     m <- g + geom_boxplot(aes(color = decadeBuilt, fill = decadeBuilt), 
                           alpha = 0.2) + coord_flip()
     print(m)
   }
   else if ((type == 2) & !input$year) {
-    m <- g + geom_histogram(color = '#FF1493', fill = '#FF1493',
-                            alpha=0.2, bins = 50)
-    print(m)
-  }
-  else if ((type ==2) & input$year & dec == "All Decades") {
     newData <- getDatadec()
-    m <- g + geom_histogram(aes(color = decadeBuilt, fill = decadeBuilt),
-                            alpha=0.2, bins = 50)
+    m <- g + geom_histogram(color = '#FF1493', fill = '#FF1493', alpha=0.2)
     print(m)
   }
-  else if ((type ==2) & input$year & dec != "All Decades") {
+  else if ((type ==2) & input$year & (dec == "All Decades")) {
     newData <- getDatadec()
-    m <- g + geom_histogram(aes(color = yrBuilt, fill = yrBuilt), 
-                            alpha = 0.2)
+    m <- g + geom_histogram(aes(color = decadeBuilt, fill = decadeBuilt), alpha=0.2)
     print(m)
   }
-})
-
-output$quantTable <- renderDataTable({
-  var <- input$quant
-  stat <- input$stat
-  newData <- getDatadec()
-  newDataSub <- newData[, c("decadeBuilt", "yrBuilt", var),
-                        drop = FALSE]
-  tab <- aggregate(newDataSub[[var]] ~ decadeBuilt + yrBuilt,
-                   data = newDataSub,
-                   FUN = stat)
-  colnames(tab) <- c("Decade Built", 'Year Built', "Stat")
-  names(tab)[names(tab) == 'Stat'] <- paste0(stat  ,  var)
-  tab <- tab %>%                   # Using dplyr functions
-    mutate_if(is.numeric,
-              round,
-              digits = 2)
-})
-
-output$title <- renderUI({
-  v <- input$dec
-  var <- input$quant
-  if (v != "All Decades") {
-    paste0('Investigation of homes in the ', v)
+  else if ((type ==2) & input$year & (dec != "All Decades")) {
+    newData <- getDatadec()
+    m <- g + geom_histogram(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2)
+    print(m)
   }
-  else if (v == "All Decades"){
-    paste0('Investigation of homes 1900-2000')
-  }
-})
-#Create Categorical Outputs
-#______________________________________________________________________________________________________
-output$title2 <- renderUI({
-  v <- input$dec2
-  var <- input$cat
-  if (v != "All Decades") {
-    paste0('Investigation of homes in the ', v)
-  }
-  else if (v == "All Decades"){
-    paste0('Investigation of homes 1900-2000')
-  }
-})
-output$catGraph <- renderPlot ({
-  var <- input$cat
-  newData2 <- getDatadec2()
-  dec2 <- input$dec2
-  g <- ggplot(newData2, aes_string(x = var))
-  if (!input$year2) {
-    newData2 <- getDatadec2()
+  if (!input$year & (input$quantCat == "Categorical")) {
+    newData <- getDatadec()
     m <- g +
       geom_bar(color = '#862efd', fill = '#862efd', alpha = 0.2)
     print(m)
   }
-  else if (input$year2 & dec2 != "All Decades") {
-    newData2 <- getDatadec2()
-    m <- g + geom_bar(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2)
+  else if (input$year & (input$quantCat == 'Categorical') & (input$dec == "All Decades")){
+    newData <- getDatadec()
+    m <- g + geom_bar(aes(color = decadeBuilt, fill = decadeBuilt), alpha = 0.2)
     print(m)
   }
-  else if (input$year2 & dec2 == "All  Decades") {
-    m <- g + geom_bar(aes(color = decadeBuilt, fill = decadeBuilt), alpha = 0.2)
+  else if (input$year & (input$quantCat == 'Categorical') & (input$dec != "All Decades")){
+    newData <- getDatadec()
+    m <- g + geom_bar(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2)
     print(m)
   }
 })
 
-#Create frequency tables
+output$statchoice <- renderUI ({
+  if (input$quantCat == 'Quantitative')
+    selectInput('stat', "Choose stat",
+                choices = list('Mean' = 'mean',
+                               'Median' = 'median',
+                               'Standard Deviation' = 'sd'))
+})
+
+output$quantTable <- renderDataTable ({
+  if (input$quantCat == 'Quantitative') {
+  var <- input$var
+  stat <- input$stat
+  newData <- getDatadec()
+  newDataSub <- newData[ , c('decadeBuilt', 'yrBuilt', var), drop = FALSE]
+  tab <- aggregate(newDataSub[[var]] ~ decadeBuilt + yrBuilt,
+                   data = newDataSub, FUN = stat)
+  colnames(tab) <- c("Decade Built", 'Year Built', "Stat")
+  names(tab)[names(tab) == 'Stat'] <- paste0(stat  ,  var)
+  tab <- tab %>%                   # Using dplyr functions
+      mutate_if(is.numeric,
+                round,
+                digits = 2)
+  }
+})
+
+output$quantTabley <- renderUI ({
+  if (input$quantCat == 'Quantitative') {
+    dataTableOutput('quantTable')
+  }
+})
+
+output$title <- renderUI({
+  v <- input$dec
+  var <- input$var
+  if (v != "All Decades") {
+    paste0('Investigation of homes in the ', v)
+  }
+  else if (v == "All Decades"){
+    paste0('Investigation of homes 1900-2000')
+  }
+})
+
+output$kabley <- renderUI ({
+  if (input$quantCat == 'Categorical') {
+    verbatimTextOutput('kable')
+  }
+})
+
 output$kable <- renderPrint ({
-  var <- input$cat
-  dec <- input$dec2
-  newData <- getDatadec2()
+  var <- input$var
+  dec <- input$dec
+  newData <- getDatadec()
   newDataSub <- newData[, c("decadeBuilt", "yrBuilt", var), drop = FALSE]
   colnames(newDataSub) <- c('decadeBuilt', 'yearBuilt', 'Three')
-  if (!input$year2) {
+  if (!input$year & (input$quantCat == 'Categorical')) {
     tab <- addmargins(table(newDataSub$decadeBuilt, newDataSub$Three))
     print(kable(tab, style = "simple",
                 caption = paste0('Frequency of ', var , 
                                  ' for the', dec)))
   }
-  else if (input$year2) {
+  else if (input$year & (input$quantCat == 'Categorical')) {
     tab <- addmargins(table(newDataSub$yearBuilt, newDataSub$Three))
     print(kable(tab, style = "simple", 
                 caption = paste0('Frequency of ', var , 
                                  ' for the ', dec, ' by year')))
   }
+})
+
+#Create EDA
+#______________________________________________________________________________________________________
+output$Summ <- renderPrint ({
+    stargazer(
+      getData(),
+      type = "text",
+      title = "Descriptive statistics",
+      digits = 1,
+      out = "table1.txt")
+})
+
+output$structure <- renderPrint ({
+  str(getData())
+})
+
+output$ysum <- renderPrint ({
+  var <- input$resp
+  newData <- getData()
+  newDataSub <- newData[ , c(var), drop = FALSE]
+  summary(newDataSub)
+})
+
+output$ggp <- renderPlot ({
+  newData <- getData()
+  newData <- newData[ , c(1:6, 9)]
+  ggpairs(newData)
+})
+
+output$corrp <- renderPlot ({
+  newData <- getData()
+  newData <- newData[ , c(1:6, 9)]
+  correlation <- cor(newData, method = "spearman")
+  corrplot(correlation, type = "upper", tl.pos = "lt", 
+           tl.col = "black", tl.cex = 0.75,
+           tl.srt = 45,mar = c(2, 0, 1, 0))
+  corrplot(correlation, type = "lower", method = "number", 
+           add = TRUE,
+           diag = FALSE, tl.pos = "n", number.cex = 0.75)
 })
 
 #Create Model Fitting
@@ -217,23 +287,245 @@ output$cntTrain <-
 output$cntTest <-
   renderText(paste("Test Data:", nrow(testData()), "records"))
 
-output$class <- renderUI ({
+output$y <- renderUI ({
   if (input$class == 'class') {
     selectInput('response', 'Choose response',
-                choice = list('Waterfront' = 'waterfrontYN',
-                              'Basement' = 'basementYN',
-                              'Year Built' = 'yrBuilt',
-                              'Decade Built' = 'decadeBuilt',
-                              'Renovated' = 'renovatedYN',
-                              'Zipcode' = 'zipcode'),
-                selected = 'waterfrontYN')
-  if (input$class == 'reg') {
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac'))
+  }
+  else if (input$class == 'reg') {
     selectInput('response', 'Choose response',
                 choice = list('Price' = 'price',
-                              '#'))
-  }
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'))
   }
 })
+
+output$x <- renderUI ({
+  if (input$response == 'waterfrontFac') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'basementFac') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'yrBuilt') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'decadeBuiltFac') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'renovatedFac') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'zipcodeFac') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'price') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'bedrooms') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+    
+  }
+  else if (input$response == 'bathrooms') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+    
+  }
+  else if (input$response == 'sqftLiving') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Year Built' = 'yrBuilt',
+                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
+  }
+  else if (input$response == 'sqftLot') {
+    selectInput('predictors', 'Choose predictor(s)',
+                choice = list('Waterfront' = 'waterfrontFac',
+                              'Basement' = 'basementFac',
+                              'Decade Built' = 'decadeBuiltFac',
+                              'Renovated' = 'renovatedFac',
+                              'Zipcode' = 'zipcodeFac',
+                              'Price' = 'price',
+                              '# of Bedrooms' = 'bedrooms',
+                              '# of Bathrooms' = 'bathrooms',
+                              'Living Space (sqrt)' = 'sqftLiving',
+                              'Year Built' = 'yrBuilt'), multiple = TRUE)
+  }
+})
+
+loglinFit <- reactive ({
+  train <- trainingData()
+  y <- input$response
+  x <- input$predictors
+  if (input$class == 'reg') {
+    f <- as.formula(
+      paste(y, 
+            paste(x, collapse = " + "), 
+            sep = " ~ "))
+    
+    train(f, data = train,
+          method = "lm",
+          preProcess = c("center", "scale"),
+          trControl = trainControl(method = "cv", number = 5))
+  }
+  else if (input$class == 'class') {
+    train <- trainingData()
+    f <- as.formula(
+      paste(y, 
+            paste(x, collapse = " + "), 
+            sep = " ~ "))
+    
+    train(f, data = train,
+          method = "glm",
+          preProcess = c("center", "scale"),
+          trControl = trainControl(method = "cv", number = 5))
+  }
+})
+
+output$loglinsum <- renderPrint ({
+  if (input$action) {
+    summary(loglinFit())
+  }
+})
+
+
+  # summary(loglinFit())
+  
+  # renderImage({
+  #   img <- htmltools::capturePlot({
+  #     hist(rnorm(input$num))
+  #   }, height = 400, width = 400)
+  #   list(src = img, width = 100, height = 100)
+  # }, deleteFile = TRUE)
+  
+
+
+# boostFit <- reactive ({
+#   train <- trainingData()
+#   y <- input$response
+#   x <- input$predictors
+#   f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
+#   train(f, data = train,
+#           method = "gbm",
+#           preProcess = c("center", "scale"),
+#           trControl = trainControl(method = 'cv', number = 6), verbose=FALSE)
+# })
+# 
+# rfFit <- reactive ({
+#   train <- trainingData()
+#   y <- input$response
+#   x <- input$predictors
+#   f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
+#   train(f, data = train,
+#         method = "rf",
+#         trControl = trainControl(method = "cv",
+#                                  number = 5),
+#         preProcess = c("center", "scale"))
+# })
+
 #End function
 #_______________________________________________________________________________________________________
 })
