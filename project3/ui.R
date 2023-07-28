@@ -18,6 +18,7 @@ library(recipes)
 library(GGally)
 library(corrplot)
 library(htmltools)
+library(shinyWidgets)
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
@@ -108,11 +109,17 @@ tabPanel('Model Fitting',
         "Slider1", "Train/Test Split %", min = 0, max = 100, value = 75),
       textOutput("cntTrain"),
       textOutput("cntTest"),
-      selectInput("class", 
-                  label = "Select classification or regression", 
-                  choices = list('Regression' = 'reg',
-                                 'Classification' = 'class')),
-      uiOutput('y'),
+      # selectInput("class", 
+      #             label = "Select classification or regression", 
+      #             choices = list('Regression' = 'reg',
+      #                            'Classification' = 'class')),
+      selectInput('response', 'Choose response',
+                  choice = list('Price' = 'price',
+                                '# of Bedrooms' = 'bedrooms',
+                                '# of Bathrooms' = 'bathrooms',
+                                'Living Space (sqrt)' = 'sqftLiving',
+                                'Year Built' = 'yrBuilt',
+                                'Lot Space (sqrt)' = 'sqftLot')),
       uiOutput('x'),
       actionButton("action", label = "Begin Fits"),
     ),
@@ -123,10 +130,15 @@ tabPanel('Model Fitting',
       tabPanel('Fit Statistics',
                
       ),
-      tabPanel("Summaries",
-        box(withSpinner(verbatimTextOutput('loglinsum')))
+      tabPanel("Summary",
+        box(withSpinner(verbatimTextOutput('linsum')), title = 'Summary of linear fit'),
+        box(withSpinner(verbatimTextOutput('boostsum')), width = 6, title = 'Summary of boost fit'),
+        box(withSpinner(verbatimTextOutput('rfsum')), width = 6, 
+            title = 'Summary of random forest fit')
       ),
       tabPanel("Plots",
+        box(withSpinner(plotOutput('boostplot')), width = 6, title = 'Plot of boost fit'),
+        box(withSpinner(plotOutput('rfplot')), width = 6, title = 'Plot of random forest fit')
       )
     )
     )

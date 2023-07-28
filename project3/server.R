@@ -19,6 +19,7 @@ library(recipes)
 library(GGally)
 library(corrplot)
 library(htmltools)
+library(shinyWidgets)
 
 setwd("C:/Documents/Github/project3")
 house <- read.csv('house.csv')
@@ -287,55 +288,8 @@ output$cntTrain <-
 output$cntTest <-
   renderText(paste("Test Data:", nrow(testData()), "records"))
 
-output$y <- renderUI ({
-  if (input$class == 'class') {
-    selectInput('response', 'Choose response',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Basement' = 'basementFac',
-                              'Decade Built' = 'decadeBuiltFac',
-                              'Renovated' = 'renovatedFac',
-                              'Zipcode' = 'zipcodeFac'))
-  }
-  else if (input$class == 'reg') {
-    selectInput('response', 'Choose response',
-                choice = list('Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'))
-  }
-})
-
 output$x <- renderUI ({
-  if (input$response == 'waterfrontFac') {
-    selectInput('predictors', 'Choose predictor(s)',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Basement' = 'basementFac',
-                              'Decade Built' = 'decadeBuiltFac',
-                              'Renovated' = 'renovatedFac',
-                              'Zipcode' = 'zipcodeFac',
-                              'Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
-  }
-  else if (input$response == 'basementFac') {
-    selectInput('predictors', 'Choose predictor(s)',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Decade Built' = 'decadeBuiltFac',
-                              'Renovated' = 'renovatedFac',
-                              'Zipcode' = 'zipcodeFac',
-                              'Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
-  }
-  else if (input$response == 'yrBuilt') {
+  if (input$response == 'yrBuilt') {
     selectInput('predictors', 'Choose predictor(s)',
                 choice = list('Waterfront' = 'waterfrontFac',
                               'Basement' = 'basementFac',
@@ -348,45 +302,7 @@ output$x <- renderUI ({
                               'Living Space (sqrt)' = 'sqftLiving',
                               'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
   }
-  else if (input$response == 'decadeBuiltFac') {
-    selectInput('predictors', 'Choose predictor(s)',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Basement' = 'basementFac',
-                              'Renovated' = 'renovatedFac',
-                              'Zipcode' = 'zipcodeFac',
-                              'Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
-  }
-  else if (input$response == 'renovatedFac') {
-    selectInput('predictors', 'Choose predictor(s)',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Basement' = 'basementFac',
-                              'Decade Built' = 'decadeBuiltFac',
-                              'Zipcode' = 'zipcodeFac',
-                              'Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
-  }
-  else if (input$response == 'zipcodeFac') {
-    selectInput('predictors', 'Choose predictor(s)',
-                choice = list('Waterfront' = 'waterfrontFac',
-                              'Basement' = 'basementFac',
-                              'Decade Built' = 'decadeBuiltFac',
-                              'Renovated' = 'renovatedFac',
-                              'Price' = 'price',
-                              '# of Bedrooms' = 'bedrooms',
-                              '# of Bathrooms' = 'bathrooms',
-                              'Living Space (sqrt)' = 'sqftLiving',
-                              'Year Built' = 'yrBuilt',
-                              'Lot Space (sqrt)' = 'sqftLot'), multiple = TRUE)
-  }
+
   else if (input$response == 'price') {
     selectInput('predictors', 'Choose predictor(s)',
                 choice = list('Waterfront' = 'waterfrontFac',
@@ -456,75 +372,80 @@ output$x <- renderUI ({
   }
 })
 
-loglinFit <- reactive ({
+linFit <- reactive ({
+  trains <- trainingData()
+  y <- input$response
+  x <- input$predictors
+  f <- as.formula(
+    paste(y, 
+          paste(x, collapse = " + "), 
+          sep = " ~ "))
+  
+  train(f, data = trains,
+        method = "lm",
+        preProcess = c("center", "scale"),
+        trControl = trainControl(method = "cv", number = 5))
+})
+
+output$linsum <- renderPrint ({
+  if (input$action) {
+    summary(linFit())
+  }
+})
+
+output$linplot <- renderPlot ({
+  if (input$action) {
+    plot(linFit())
+  }
+})
+
+boostFit <- reactive ({
   train <- trainingData()
   y <- input$response
   x <- input$predictors
-  if (input$class == 'reg') {
-    f <- as.formula(
-      paste(y, 
-            paste(x, collapse = " + "), 
-            sep = " ~ "))
-    
-    train(f, data = train,
-          method = "lm",
+  f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
+  train(f, data = train,
+          method = "gbm",
           preProcess = c("center", "scale"),
-          trControl = trainControl(method = "cv", number = 5))
-  }
-  else if (input$class == 'class') {
-    train <- trainingData()
-    f <- as.formula(
-      paste(y, 
-            paste(x, collapse = " + "), 
-            sep = " ~ "))
-    
-    train(f, data = train,
-          method = "glm",
-          preProcess = c("center", "scale"),
-          trControl = trainControl(method = "cv", number = 5))
-  }
+          trControl = trainControl(method = 'cv', number = 6), verbose=FALSE)
 })
 
-output$loglinsum <- renderPrint ({
+output$boostplot <- renderPlot ({
   if (input$action) {
-    summary(loglinFit())
+  plot(boostFit())
   }
 })
 
+output$boostsum <- renderPrint ({
+  if (input$action){
+  print(boostFit())
+  }
+})
 
-  # summary(loglinFit())
-  
-  # renderImage({
-  #   img <- htmltools::capturePlot({
-  #     hist(rnorm(input$num))
-  #   }, height = 400, width = 400)
-  #   list(src = img, width = 100, height = 100)
-  # }, deleteFile = TRUE)
-  
+rfFit <- reactive ({
+  train <- trainingData()
+  y <- input$response
+  x <- input$predictors
+  f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
+  train(f, data = train,
+        method = "rf",
+        trControl = trainControl(method = "cv",
+                                 number = 5),
+        preProcess = c("center", "scale"),
+        tuneGrid = data.frame(mtry = 1:sqrt(ncol(train))))
+})
 
+output$rfplot <- renderPlot ({
+  if (input$action) {
+  plot(rfFit())
+  }
+})
 
-# boostFit <- reactive ({
-#   train <- trainingData()
-#   y <- input$response
-#   x <- input$predictors
-#   f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
-#   train(f, data = train,
-#           method = "gbm",
-#           preProcess = c("center", "scale"),
-#           trControl = trainControl(method = 'cv', number = 6), verbose=FALSE)
-# })
-# 
-# rfFit <- reactive ({
-#   train <- trainingData()
-#   y <- input$response
-#   x <- input$predictors
-#   f <- as.formula(paste(y, paste(x, collapse = ' + '), sep = " ~ "))
-#   train(f, data = train,
-#         method = "rf",
-#         trControl = trainControl(method = "cv",
-#                                  number = 5),
-#         preProcess = c("center", "scale"))
-# })
+output$rfsum <- renderPrint ({
+  if (input$action) {
+  print(rfFit())
+  }
+})
 
 #End function
 #_______________________________________________________________________________________________________
