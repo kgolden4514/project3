@@ -421,10 +421,10 @@ boostFit <- reactive ({
           method = "gbm",
           preProcess = c("center", "scale"),
           tuneGrid = expand.grid(interaction.depth = c(1,4,7), 
-                                 n.trees = c(1:20) , 
+                                 n.trees = c(1:10) , 
                                  shrinkage = 0.1,
                                  n.minobsinnode = c(10,20, 40)),
-          trControl = trainControl(method = 'cv', number = 6), verbose=FALSE)
+          trControl = trainControl(method = 'cv', number = 5), verbose=FALSE)
 })
 
 output$boostplot <- renderPlot ({
@@ -449,7 +449,8 @@ rfFit <- reactive ({
         trControl = trainControl(method = "cv",
                                  number = 5),
         preProcess = c("center", "scale"),
-        tuneGrid = data.frame(mtry = 1:sqrt(ncol(train))))
+        tuneGrid = 
+          data.frame(mtry = 1:sqrt(ncol(train))))
 })
 
 output$rfplot <- renderPlot ({
@@ -521,12 +522,15 @@ linRMSE2 <- reactive ({
 
 rfPred <- reactive ({
   response <- input$response
-  rfPred <- predict(rfFit(), newdata = dplyr::select(testData(), -input$response))
+  rfPred <- predict(rfFit(), newdata = testData())
 })
 
 boostPred <- reactive ({
   response <- input$response
-  boostPred <- predict(boostFit(), newdata = dplyr::select(testData(), -response))
+  boost <- boostFit()
+  x <- boost$results
+  tree <- boost$bestTune[[1]]
+  boostPred <- predict(boostFit(), newdata = testData(), n.trees = tree)
 })
 
 output$linRMSE2P <- renderPrint ({
@@ -535,24 +539,45 @@ output$linRMSE2P <- renderPrint ({
   }
 })
 
-# rfRMSE2 <- renderPrint ({
-#   if (input$action) {
-#     response <- input$response
-#     test <- testData()
-#     rfRMSE2 <- postResample(rfPred(), obs = test$response)
-#     print(rfRMSE2)
-#   }
-# })
+rfRMSE2 <- reactive ({
+    response <- input$response
+    test <- testData()
+    testSub <- test[ , c(response), drop = TRUE]
+    rfRMSE2 <- postResample(rfPred(), obs = testSub)
+})
 
-# boostRMSE2 <- renderPrint ({
-#   if (input$action) {
-#     response <- input$response
-#     test <- testData()
-#     boostRMSE2 <- postResample(boostPred, obs = test$response)
-#     print(boostRMSE2)
-#   }
-# })
+output$rfRMSE2P <- renderPrint ({
+  if (input$action) {
+    print(rfRMSE2())
+  }
+})
 
+boostRMSE2 <- reactive ({
+    response <- input$response
+    test <- testData()
+    testSub <- test[ , c(response), drop = TRUE]
+    boostRMSE2 <- postResample(boostPred(), obs = testSub)
+})
+
+output$boostRMSE2P <- renderPrint ({
+  if (input$action) {
+    print(boostRMSE2())
+  }
+})
+
+modelsRMSE <- reactive ({
+  data.frame(Linear.Model=linRMSE2()[1],
+             Random.Forest.Model=rfRMSE2()[1], 
+             Boost.Model=boostRMSE2()[1])
+})
+
+output$smallest <- renderPrint ({
+  if (input$action) {
+  smallest_RMSE<-colnames(modelsRMSE())[apply(modelsRMSE(),1,which.min)]
+  paste0("When the response variable is ", input$response, " and the predictor is ",
+         input$predictors, " the ", smallest_RMSE, " is the winner")
+  }
+})
 
 #End function
 #_______________________________________________________________________________________________________
