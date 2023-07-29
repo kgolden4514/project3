@@ -469,9 +469,8 @@ output$linRMSE <- renderPrint ({
   if (input$action) {
     lin <- linFit()
     x <- lin$results
-    c <- x[ , c(2, 3, 4)]
-    # y <- rf$bestTune[[1]]
-    # c <- x[c(1), c(2, 3, 4)]
+    y <- rf$bestTune[[1]]
+    c <- x[c(1), c(2, 3, 4)]
     print(c)
   }
 })
@@ -494,7 +493,7 @@ output$boostRMSE <- renderPrint ({
     inter <- boost$bestTune[[2]]
     shrink <- boost$bestTune[[3]]
     mino <- boost$bestTune[[4]]
-    d <- x %>% filter(shrinkage == shrink)
+    d <- c %>% filter(shrinkage == shrink)
     d <- d %>% filter(interaction.depth == inter)
     d <- d %>% filter(n.minobsinnode == mino)
     d <- d %>% filter(n.trees == tree)
@@ -508,7 +507,7 @@ linPred <- reactive ({
   test <- testData()
   ix <- which(colnames(test) %in% c(input$response))
   test <- test[ ,-ix]
-  linearPred <- predict(linFit(), newdata = test)
+  linearPred <- predict(linFit(), newdata =  test)
 })
 
 output$linPredsum <- renderPrint ({
@@ -520,8 +519,8 @@ output$linPredsum <- renderPrint ({
 linRMSE2 <- reactive ({
   response <- input$response
   test <- testData()
-  test <- test[, c(input$response), drop = TRUE]
-  linRMSE2<- postResample(linPred(), obs = test)
+  testSub <- test[ , c(response), drop = TRUE]
+  linRMSE2<- postResample(linPred(), obs = testSub)
 })
 
 rfPred <- reactive ({
@@ -535,14 +534,13 @@ rfPred <- reactive ({
 boostPred <- reactive ({
   response <- input$response
   boost <- boostFit()
+  x <- boost$results
+  tree <- boost$bestTune[[1]]
   test <- testData()
   ix <- which(colnames(test) %in% c(input$response))
   test <- test[ ,-ix]
-  x <- boost$results
-  tree <- boost$bestTune[[1]]
   boostPred <- predict(boostFit(), newdata = test, n.trees = tree)
 })
-
 
 output$linRMSE2P <- renderPrint ({
   if (input$action) {
@@ -564,10 +562,10 @@ output$rfRMSE2P <- renderPrint ({
 })
 
 boostRMSE2 <- reactive ({
-  response <- input$response
-  test <- testData()
-  testSub <- test[ , c(response), drop = TRUE]
-  boostRMSE2 <- postResample(boostPred(), obs = testSub)
+    response <- input$response
+    test <- testData()
+    testSub <- test[ , c(response), drop = TRUE]
+    boostRMSE2 <- postResample(boostPred(), obs = testSub)
 })
 
 output$boostRMSE2P <- renderPrint ({
@@ -589,6 +587,21 @@ output$smallest <- renderPrint ({
          input$predictors, " the ", smallest_RMSE, " is the winner")
   }
 })
+
+output$price <- renderUI ({
+  if (input$action) {
+  numericInput('price', 'Enter price')
+  }
+})
+
+output$predic <- renderPrint ({
+  if (input$action) {
+  predict(linFit(), newdata = data.frame(bedrooms = c(3)),
+        type = "response", se.fit = TRUE)
+  }
+})
+
+
 #End function
 #_______________________________________________________________________________________________________
 })

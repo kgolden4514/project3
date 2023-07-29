@@ -22,7 +22,7 @@ library(shinyWidgets)
 library(Metrics)
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
-navbarPage('Golden Project 3',
+navbarPage('Golden Project 3', 
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
   titlePanel('About'),
@@ -111,10 +111,6 @@ tabPanel('Model Fitting',
         "Slider1", "Train/Test Split %", min = 0, max = 100, value = 75),
       textOutput("cntTrain"),
       textOutput("cntTest"),
-      # selectInput("class", 
-      #             label = "Select classification or regression", 
-      #             choices = list('Regression' = 'reg',
-      #                            'Classification' = 'class')),
       selectInput('response', 'Choose response',
                   choice = list('Price' = 'price',
                                 '# of Bedrooms' = 'bedrooms',
@@ -124,6 +120,7 @@ tabPanel('Model Fitting',
                                 'Lot Space (sqrt)' = 'sqftLot')),
       uiOutput('x'),
       actionButton("action", label = "Begin Fits"),
+      uiOutput('price')
     ),
     mainPanel((tabBox(
       id = "tabset1",
@@ -155,15 +152,16 @@ tabPanel('Model Fitting',
       tabPanel("Plots",
         box(withSpinner(plotOutput('boostplot')), width = 6, title = 'Plot of boost fit'),
         box(withSpinner(plotOutput('rfplot')), width = 6, title = 'Plot of random forest fit')
-      )
+      ),
+      tabPanel('Prediction'),
     )
     )
   ))),
 tabPanel('Prediction',
 titlePanel('Prediction'),
   sidebarLayout(
-  sidebarPanel(),
-  mainPanel(
+  sidebarPanel( ),
+  mainPanel(box(withSpinner(verbatimTextOutput('predic')))
   ),
 ))),
 tabPanel('Data',
