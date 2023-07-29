@@ -590,13 +590,80 @@ output$smallest <- renderPrint ({
   }
 })
 
-lin <- reactive ({
-  predict(linFit(), newdata = data.frame(bedrooms = c(1,2)), se.fit = TRUE)
+# lin <- reactive ({
+#   predict(linFit(), newdata = data.frame(bedrooms = c(1,2)), se.fit = TRUE)
+# })
+# 
+# output$lina <- renderPrint ({
+#   lin()
+# })
+
+linFitAll <- reactive ({
+  trains <- trainingData()
+  train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
+          decadeBuiltFac + yrBuilt,
+        data = trains,
+        method = 'lm',
+        preProcess = c("center", "scale"),
+        trControl = trainControl(method = "cv", number = 5))
 })
 
-output$lina <- renderPrint ({
-  lin()
+boostFitAll <- reactive ({
+  train <- trainingData()
+  train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
+          decadeBuiltFac + yrBuilt, 
+        data = train,
+        method = "gbm",
+        preProcess = c("center", "scale"),
+        tuneGrid = expand.grid(interaction.depth = c(1,4,7), 
+                               n.trees = c(1:10) , 
+                               shrinkage = 0.1,
+                               n.minobsinnode = c(10,20, 40)),
+        trControl = trainControl(method = 'cv', number = 5), verbose=FALSE)
 })
+
+rfFitAll <- reactive ({
+  train <- trainingData()
+  train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
+          decadeBuiltFac + yrBuilt, 
+        data = train,
+        method = "rf",
+        trControl = trainControl(method = "cv",
+                                 number = 5),
+        preProcess = c("center", "scale"),
+        tuneGrid = 
+          data.frame(mtry = 1:sqrt(ncol(train))))
+})
+
+data <- reactive({
+  df <- data.frame(expand.grid(bedrooms = input$bedrooms, bathrooms = input$bathrooms, 
+                               sqftLiving = input$living,
+                               sqftLot = input$lot, yrBuilt = input$year, 
+                               waterfrontFac = input$waterfront,
+                               decadeBuiltFac = input$decade))
+})
+
+output$predSpec <- renderPrint ({
+  if (input$modelChoice == 1 & input$prediction) {
+    
+
+    a <- predict(linFitAll(), data())
+    print(a)
+    paste('Price prediction when # of bedrooms = ', input$bedrooms,
+          ', # of bathrooms = ', input$bathrooms, ', Living Space (sqft) = ', input$living,
+          ', Lot Size (sqft) = ', input$lot, ', year built = ', input$year,
+          ', waterfront property = ', input$waterfront, ', and decade built = ', input$decade, '.')
+  }
+  else if (input$modelChoice == 2) {
+    a <- predict(rfFitAll(), df())
+    print(a)
+  }
+  else if (input$modelChoice == 3) {
+    a <- predict(boostFitAll(), df())
+    pring(a)
+  }
+})
+
 #End function
 #_______________________________________________________________________________________________________
 })
