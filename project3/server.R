@@ -20,6 +20,7 @@ library(GGally)
 library(corrplot)
 library(htmltools)
 library(shinyWidgets)
+library(Metrics)
 
 setwd("C:/Documents/Github/project3")
 house <- read.csv('house.csv')
@@ -30,6 +31,7 @@ house$waterfrontFac <- as.factor(house$waterfrontYN)
 house$yrBuiltFac <- as.factor(house$yrBuilt)
 house$decadeBuiltFac <- as.factor(house$decadeBuilt)
 house$zipcodeFac <- as.factor(house$zipcode)
+house$yrBuiltCat <- as.character(house$yrBuilt)
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
@@ -41,6 +43,7 @@ shinyServer(function(input, output, session) {
   house$yrBuiltFac <- as.factor(house$yrBuilt)
   house$decadeBuiltFac <- as.factor(house$decadeBuilt)
   house$zipcodeFac <- as.factor(house$zipcode)
+  house$yrBuiltCat <- as.character(house$yrBuilt)
 
 #Create datasets
 #_______________________________________________________________________________________________________
@@ -126,7 +129,7 @@ output$graph <- renderPlot ({
   }
   else if ((type == 1) & input$year & dec != "All Decades") {
     newData <- getDatadec()
-    m <- g + geom_boxplot(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2) + 
+    m <- g + geom_boxplot(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2) + 
       coord_flip()
     print(m)
   }
@@ -148,7 +151,7 @@ output$graph <- renderPlot ({
   }
   else if ((type ==2) & input$year & (dec != "All Decades")) {
     newData <- getDatadec()
-    m <- g + geom_histogram(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2)
+    m <- g + geom_histogram(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2)
     print(m)
   }
   if (!input$year & (input$quantCat == "Categorical")) {
@@ -164,7 +167,7 @@ output$graph <- renderPlot ({
   }
   else if (input$year & (input$quantCat == 'Categorical') & (input$dec != "All Decades")){
     newData <- getDatadec()
-    m <- g + geom_bar(aes(color = yrBuilt, fill = yrBuilt), alpha = 0.2)
+    m <- g + geom_bar(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2)
     print(m)
   }
 })
@@ -182,8 +185,8 @@ output$quantTable <- renderDataTable ({
   var <- input$var
   stat <- input$stat
   newData <- getDatadec()
-  newDataSub <- newData[ , c('decadeBuilt', 'yrBuilt', var), drop = FALSE]
-  tab <- aggregate(newDataSub[[var]] ~ decadeBuilt + yrBuilt,
+  newDataSub <- newData[ , c('decadeBuilt', 'yrBuiltCat', var), drop = FALSE]
+  tab <- aggregate(newDataSub[[var]] ~ decadeBuilt + yrBuiltCat,
                    data = newDataSub, FUN = stat)
   colnames(tab) <- c("Decade Built", 'Year Built', "Stat")
   names(tab)[names(tab) == 'Stat'] <- paste0(stat  ,  var)
@@ -221,7 +224,7 @@ output$kable <- renderPrint ({
   var <- input$var
   dec <- input$dec
   newData <- getDatadec()
-  newDataSub <- newData[, c("decadeBuilt", "yrBuilt", var), drop = FALSE]
+  newDataSub <- newData[, c("decadeBuilt", "yrBuiltCat", var), drop = FALSE]
   colnames(newDataSub) <- c('decadeBuilt', 'yearBuilt', 'Three')
   if (!input$year & (input$quantCat == 'Categorical')) {
     tab <- addmargins(table(newDataSub$decadeBuilt, newDataSub$Three))
@@ -240,32 +243,41 @@ output$kable <- renderPrint ({
 #Create EDA
 #______________________________________________________________________________________________________
 output$Summ <- renderPrint ({
-    stargazer(
+  if (input$begin) {  
+  stargazer(
       getData(),
       type = "text",
       title = "Descriptive statistics",
       digits = 1,
       out = "table1.txt")
+  }
 })
 
 output$structure <- renderPrint ({
+  if (input$begin){
   str(getData())
+}
 })
 
 output$ysum <- renderPrint ({
+  if (input$begin) {
   var <- input$resp
   newData <- getData()
   newDataSub <- newData[ , c(var), drop = FALSE]
   summary(newDataSub)
+  }
 })
 
 output$ggp <- renderPlot ({
+  if (input$begin) {
   newData <- getData()
   newData <- newData[ , c(1:6, 9)]
   ggpairs(newData)
+  }
 })
 
 output$corrp <- renderPlot ({
+  if (input$begin) {
   newData <- getData()
   newData <- newData[ , c(1:6, 9)]
   correlation <- cor(newData, method = "spearman")
@@ -275,6 +287,7 @@ output$corrp <- renderPlot ({
   corrplot(correlation, type = "lower", method = "number", 
            add = TRUE,
            diag = FALSE, tl.pos = "n", number.cex = 0.75)
+  }
 })
 
 #Create Model Fitting
@@ -407,6 +420,10 @@ boostFit <- reactive ({
   train(f, data = train,
           method = "gbm",
           preProcess = c("center", "scale"),
+          tuneGrid = expand.grid(interaction.depth = c(1,4,7), 
+                                 n.trees = c(1:20) , 
+                                 shrinkage = 0.1,
+                                 n.minobsinnode = c(10,20, 40)),
           trControl = trainControl(method = 'cv', number = 6), verbose=FALSE)
 })
 
@@ -444,6 +461,43 @@ output$rfplot <- renderPlot ({
 output$rfsum <- renderPrint ({
   if (input$action) {
   print(rfFit())
+  }
+})
+
+output$linRMSE <- renderPrint ({
+  if (input$action) {
+    lin <- linFit()
+    x <- lin$results
+    y <- rf$bestTune[[1]]
+    c <- x[c(1), c(2)]
+    paste0('Linear RMSE on trained data = ', c)
+  }
+})
+
+output$rfRMSE <- renderPrint ({
+  if (input$action) {
+    rf <- rfFit()
+    x <- rf$results
+    y <- rf$bestTune[[1]]
+    c <- x[y, c(2)]
+    paste0('Random Forest RMSE on trained data = ', c)
+  }
+})
+
+output$boostRMSE <- renderPrint ({
+  if (input$action) {
+    boost <- boostFit()
+    x <- boost$results
+    tree <- boost$bestTune[[1]]
+    inter <- boost$bestTune[[2]]
+    shrink <- boost$bestTune[[3]]
+    mino <- boost$bestTune[[4]]
+    d <- c %>% filter(shrinkage == shrink)
+    d <- d %>% filter(interaction.depth == inter)
+    d <- d %>% filter(n.minobsinnode == mino)
+    d <- d %>% filter(n.trees == tree)
+    c <- d[c(1), c(5)]
+    paste0('Boost RMSE on trained data = ', c)
   }
 })
 

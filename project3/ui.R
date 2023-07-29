@@ -19,6 +19,7 @@ library(GGally)
 library(corrplot)
 library(htmltools)
 library(shinyWidgets)
+library(Metrics)
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
@@ -77,6 +78,7 @@ titlePanel('EDA'),
                                'Waterfront'= 'waterfrontYN',
                                'Basement' = 'basementYN',
                                'Renovated' = 'renovatedYN')),
+    actionButton('begin', "Begin"),
    ),
   mainPanel(tabBox(
            id = "tabset1",
@@ -128,13 +130,18 @@ tabPanel('Model Fitting',
       height = "1000px",
       width = 12,
       tabPanel('Fit Statistics',
-               
+        box(withSpinner(verbatimTextOutput('linRMSE')), title = 'Linear Model Fit Results', 
+            width = 12),
+        box(withSpinner(verbatimTextOutput('rfRMSE')), title = 'Random Forest Model Fit Results', 
+            width = 12),
+        box(withSpinner(verbatimTextOutput('boostRMSE')), title = 'Boost Model Fit Results', 
+            width = 12)
       ),
       tabPanel("Summary",
         box(withSpinner(verbatimTextOutput('linsum')), title = 'Summary of linear fit'),
-        box(withSpinner(verbatimTextOutput('boostsum')), width = 6, title = 'Summary of boost fit'),
         box(withSpinner(verbatimTextOutput('rfsum')), width = 6, 
-            title = 'Summary of random forest fit')
+            title = 'Summary of random forest fit'),
+        box(withSpinner(verbatimTextOutput('boostsum')), width = 6, title = 'Summary of boost fit')
       ),
       tabPanel("Plots",
         box(withSpinner(plotOutput('boostplot')), width = 6, title = 'Plot of boost fit'),
@@ -142,20 +149,20 @@ tabPanel('Model Fitting',
       )
     )
     )
-  )),
-  tabPanel('Prediction',
-  titlePanel('Prediction'),
+  ))),
+tabPanel('Prediction',
+titlePanel('Prediction'),
   sidebarLayout(
   sidebarPanel(),
   mainPanel()
-  )),
-),
+  ),
+)),
 tabPanel('Data',
 titlePanel('Data'),
 sidebarLayout(
 sidebarPanel(),
 mainPanel()
 )),
-))))
+)))
   
   
