@@ -589,6 +589,14 @@ output$smallest <- renderPrint ({
          input$predictors, " the ", smallest_RMSE, " is the winner")
   }
 })
+
+lin <- reactive ({
+  predict(linFit(), newdata = data.frame(bedrooms = c(1,2)), se.fit = TRUE)
+})
+
+output$lina <- renderPrint ({
+  lin()
+})
 #End function
 #_______________________________________________________________________________________________________
 })

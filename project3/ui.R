@@ -164,6 +164,7 @@ titlePanel('Prediction'),
   sidebarLayout(
   sidebarPanel(),
   mainPanel(
+    box(withSpinner(verbatimTextOutput('lina')), width = 6, title = 'We will see')
   ),
 ))),
 tabPanel('Data',
