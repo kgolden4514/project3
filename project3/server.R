@@ -469,8 +469,8 @@ output$linRMSE <- renderPrint ({
     lin <- linFit()
     x <- lin$results
     y <- rf$bestTune[[1]]
-    c <- x[c(1), c(2)]
-    paste0('Linear RMSE on trained data = ', c)
+    c <- x[c(1), c(2, 3, 4)]
+    print(c)
   }
 })
 
@@ -479,8 +479,8 @@ output$rfRMSE <- renderPrint ({
     rf <- rfFit()
     x <- rf$results
     y <- rf$bestTune[[1]]
-    c <- x[y, c(2)]
-    paste0('Random Forest RMSE on trained data = ', c)
+    c <- x[y, c(2, 3, 4)]
+    print(c)
   }
 })
 
@@ -496,10 +496,63 @@ output$boostRMSE <- renderPrint ({
     d <- d %>% filter(interaction.depth == inter)
     d <- d %>% filter(n.minobsinnode == mino)
     d <- d %>% filter(n.trees == tree)
-    c <- d[c(1), c(5)]
-    paste0('Boost RMSE on trained data = ', c)
+    c <- d[c(1), c(5, 6, 7)]
+    print(c)
   }
 })
+
+linPred <- reactive ({
+  response <- input$response
+  linearPred <- predict(linFit(), newdata = testData())
+})
+
+output$linPredsum <- renderPrint ({
+  if (input$action) {
+    summary(linFit())
+  }
+})
+
+linRMSE2 <- reactive ({
+  response <- input$response
+  test <- testData()
+  testSub <- test[ , c(response), drop = TRUE]
+  linRMSE2<- postResample(linPred(), obs = testSub)
+})
+
+rfPred <- reactive ({
+  response <- input$response
+  rfPred <- predict(rfFit(), newdata = dplyr::select(testData(), -input$response))
+})
+
+boostPred <- reactive ({
+  response <- input$response
+  boostPred <- predict(boostFit(), newdata = dplyr::select(testData(), -response))
+})
+
+output$linRMSE2P <- renderPrint ({
+  if (input$action) {
+    print(linRMSE2())
+  }
+})
+
+# rfRMSE2 <- renderPrint ({
+#   if (input$action) {
+#     response <- input$response
+#     test <- testData()
+#     rfRMSE2 <- postResample(rfPred(), obs = test$response)
+#     print(rfRMSE2)
+#   }
+# })
+
+# boostRMSE2 <- renderPrint ({
+#   if (input$action) {
+#     response <- input$response
+#     test <- testData()
+#     boostRMSE2 <- postResample(boostPred, obs = test$response)
+#     print(boostRMSE2)
+#   }
+# })
+
 
 #End function
 #_______________________________________________________________________________________________________
