@@ -39,9 +39,10 @@ tabPanel('About',
   titlePanel('About'),
   sidebarLayout(
   sidebarPanel(
-    img(src="kaggle.jpg")
   ),
-  mainPanel()
+  mainPanel(
+    img(src="kaggle.jpg", width="25%", align="center")
+  )
   )),
 navbarMenu('Data Exploration',
   tabPanel('Variables',
