@@ -203,7 +203,10 @@ tabPanel('Data',
 titlePanel('Data'),
 sidebarLayout(
 sidebarPanel(
-  varSelectInput("col", "Variable:", home, multiple = TRUE),
+  varSelectInput("col", "Choose variable(s) to display. If none selected, 
+                 all variables will be displayed.", 
+                 home, multiple = TRUE),
+  downloadButton("downloadData", "Download"),
 ),
 mainPanel(
   box(withSpinner(dataTableOutput('sub')), width = 12)

@@ -690,14 +690,27 @@ output$cntTest2 <-
 
 #Data
 #______________________________________________________________________________________________________
-output$sub <- renderDataTable ({
+subs <- reactive ({
   if (length(input$col) == 0) {
     return(home)
   }
   else if (length(input$col) != 0) {
-        home %>% dplyr::select(!!!input$col)
+    home %>% dplyr::select(!!!input$col)
   }
 })
+
+output$sub <- renderDataTable({
+  subs()
+})
+
+output$downloadData <- downloadHandler(
+  filename = function() {
+    paste(input$col, ".csv", sep = "")
+  },
+  content = function(file) {
+    write.csv(subs(), file, row.names = FALSE)
+})
+  
 #End function
 #_______________________________________________________________________________________________________
 })
