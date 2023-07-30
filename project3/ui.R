@@ -163,6 +163,10 @@ tabPanel('Prediction',
 titlePanel('Prediction'),
   sidebarLayout(
   sidebarPanel(
+    sliderInput(
+      "Slider2", "Train/Test Split %", min = 0, max = 100, value = 75),
+    textOutput("cntTrain2"),
+    textOutput("cntTest2"),
     radioButtons("modelChoice", "Choose your regression model",
                  choices = list("Linear Model" = 1, 
                                 "Random Fores Model" = 2, 
@@ -178,7 +182,7 @@ titlePanel('Prediction'),
     sliderInput('lot', label = 'Lot Size (sqft)', min = min(house$sqftLot),
                 max = max(house$sqftLot), step = 500,
                 value = (max(house$sqftLot)-min(house$sqftLot))/2),
-    sliderInput('year', 'Year Built', min = min(house$yrBuilt),
+    sliderInput('yearBui', 'Year Built', min = min(house$yrBuilt),
                 max = max(house$yrBuilt), step = 1, value = 1950),
     selectInput("waterfront", label = 'Waterfront property?',
                 choices = list("No", 'Yes'),
@@ -189,7 +193,10 @@ titlePanel('Prediction'),
                 selected = '1900s'),
   ),
   mainPanel(
-    box(withSpinner(verbatimTextOutput('predSpec')), width = 12, title = 'Price prediction in dollars')
+    box(withSpinner(dataTableOutput('proPred')), width = 12, 
+        title = 'User provided predictor values.'),
+    box(withSpinner(verbatimTextOutput('predSpec')), width = 12, 
+        title = "Selected model's predicted price($).")
   ),
 ))),
 tabPanel('Data',

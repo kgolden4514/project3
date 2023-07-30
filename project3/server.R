@@ -87,6 +87,22 @@ testData <- reactive({
   tmptestdt[-trainingRowIndex(),]
 })
 
+set.seed(100)  # setting seed to reproduce results of random sampling
+trainingRowIndex2 <-reactive({
+  sample(1:nrow(getData()),
+         splitSlider2() * nrow(getData()))
+})# row indices for training data
+
+trainingData2 <- reactive({
+  tmptraindt2 <- getData()
+  tmptraindt2[trainingRowIndex2(), ]
+})
+
+testData2 <- reactive({
+  tmptestdt2 <- getData()
+  tmptestdt2[-trainingRowIndex2(),]
+})
+
 #Create quantitative outputs
 #______________________________________________________________________________________________________
 output$vars <- renderUI ({
@@ -638,31 +654,42 @@ rfFitAll <- reactive ({
 data <- reactive({
   df <- data.frame(expand.grid(bedrooms = input$bedrooms, bathrooms = input$bathrooms, 
                                sqftLiving = input$living,
-                               sqftLot = input$lot, yrBuilt = input$year, 
+                               sqftLot = input$lot, yrBuilt = input$yearBui, 
                                waterfrontFac = input$waterfront,
                                decadeBuiltFac = input$decade))
 })
 
+output$proPred <- renderDataTable ({
+  data.frame(expand.grid(bedrooms = input$bedrooms, bathrooms = input$bathrooms, 
+                         sqftLiving = input$living,
+                         sqftLot = input$lot, yrBuilt = input$yearBui, 
+                         waterfrontFac = input$waterfront,
+                         decadeBuiltFac = input$decade))
+})
+
 output$predSpec <- renderPrint ({
   if (input$modelChoice == 1 & input$prediction) {
-    
-
     a <- predict(linFitAll(), data())
     print(a)
-    paste('Price prediction when # of bedrooms = ', input$bedrooms,
-          ', # of bathrooms = ', input$bathrooms, ', Living Space (sqft) = ', input$living,
-          ', Lot Size (sqft) = ', input$lot, ', year built = ', input$year,
-          ', waterfront property = ', input$waterfront, ', and decade built = ', input$decade, '.')
   }
-  else if (input$modelChoice == 2) {
-    a <- predict(rfFitAll(), df())
+  else if (input$modelChoice == 2 & input$prediction) {
+    a <- predict(rfFitAll(), data())
     print(a)
   }
-  else if (input$modelChoice == 3) {
-    a <- predict(boostFitAll(), df())
-    pring(a)
+  else if (input$modelChoice == 3 & input$prediction) {
+    a <- predict(boostFitAll(), data())
+    print(a)
   }
 })
+
+splitSlider2 <- reactive({
+  input$Slider2 / 100
+})
+
+output$cntTrain2 <-
+  renderText(paste("Train Data:", nrow(trainingData2()), "records"))
+output$cntTest2 <-
+  renderText(paste("Test Data:", nrow(testData2()), "records"))
 
 #End function
 #_______________________________________________________________________________________________________
