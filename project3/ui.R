@@ -202,8 +202,12 @@ titlePanel('Prediction'),
 tabPanel('Data',
 titlePanel('Data'),
 sidebarLayout(
-sidebarPanel(),
-mainPanel()
+sidebarPanel(
+  varSelectInput("col", "Variable:", home, multiple = TRUE),
+),
+mainPanel(
+  box(withSpinner(dataTableOutput('sub')), width = 12)
+),
 )),
 )))
   

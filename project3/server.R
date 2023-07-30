@@ -32,6 +32,7 @@ house$yrBuiltFac <- as.factor(house$yrBuilt)
 house$decadeBuiltFac <- as.factor(house$decadeBuilt)
 house$zipcodeFac <- as.factor(house$zipcode)
 house$yrBuiltCat <- as.character(house$yrBuilt)
+home <- read.csv('house.csv')
 
 shinyServer(function(input, output, session) {
   setwd("C:/Documents/Github/project3")
@@ -44,7 +45,7 @@ shinyServer(function(input, output, session) {
   house$decadeBuiltFac <- as.factor(house$decadeBuilt)
   house$zipcodeFac <- as.factor(house$zipcode)
   house$yrBuiltCat <- as.character(house$yrBuilt)
-
+  home <- read.csv('house.csv')
 #Create datasets
 #_______________________________________________________________________________________________________
 getData <- reactive({
@@ -101,6 +102,10 @@ trainingData2 <- reactive({
 testData2 <- reactive({
   tmptestdt2 <- getData()
   tmptestdt2[-trainingRowIndex2(),]
+})
+
+getData2 <- reactive ({
+  home
 })
 
 #Create quantitative outputs
@@ -606,14 +611,6 @@ output$smallest <- renderPrint ({
   }
 })
 
-# lin <- reactive ({
-#   predict(linFit(), newdata = data.frame(bedrooms = c(1,2)), se.fit = TRUE)
-# })
-# 
-# output$lina <- renderPrint ({
-#   lin()
-# })
-
 linFitAll <- reactive ({
   trains <- trainingData()
   train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
@@ -691,6 +688,16 @@ output$cntTrain2 <-
 output$cntTest2 <-
   renderText(paste("Test Data:", nrow(testData2()), "records"))
 
+#Data
+#______________________________________________________________________________________________________
+output$sub <- renderDataTable ({
+  if (length(input$col) == 0) {
+    return(home)
+  }
+  else if (length(input$col) != 0) {
+        home %>% dplyr::select(!!!input$col)
+  }
+})
 #End function
 #_______________________________________________________________________________________________________
 })
