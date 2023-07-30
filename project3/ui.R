@@ -21,13 +21,26 @@ library(htmltools)
 library(shinyWidgets)
 library(Metrics)
 
+house <- read.csv('house.csv')
+house$zipcode <- as.character(house$zipcode)
+house$renovatedFac <- as.factor(house$renovatedYN)
+house$basementFac<- as.factor(house$basementYN)
+house$waterfrontFac <- as.factor(house$waterfrontYN)
+house$yrBuiltFac <- as.factor(house$yrBuilt)
+house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+house$zipcodeFac <- as.factor(house$zipcode)
+house$yrBuiltCat <- as.character(house$yrBuilt)
+home <- read.csv('house.csv')
+
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
   titlePanel('About'),
   sidebarLayout(
-  sidebarPanel(),
+  sidebarPanel(
+    img(src="kaggle.jpg")
+  ),
   mainPanel()
   )),
 navbarMenu('Data Exploration',
