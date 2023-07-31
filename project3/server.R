@@ -21,6 +21,7 @@ library(corrplot)
 library(htmltools)
 library(shinyWidgets)
 library(Metrics)
+# library(MathJax)
 
 # setwd("C:/Documents/Github/project3/project3")
 house <- read.csv('./house.csv')
@@ -127,8 +128,33 @@ output$aboutdesc <- renderText ({
   paste('Gives the user a brief overview of the data and the purpose of the app.')
 })
 
+output$dataex <- renderText ({
+  paste("Allows us to look at the correlations between the variables, the distribution of the quantitative variables, and the frequency of the categorical variables.")
+})
 
+output$modeling <- renderText ({
+  paste('Model info: Gives a brief explanation of each type of model used: multiple linear regression, random forest regression, and boosted tree regression. Model fitting: Allows the user to select the predictor variables to consider, the response varaible to consider, the training and test data partition percentage, and train and fit the data to each model. Prediction: Allows the user the provide values for the predictors to predict the price of a home using the model of their choice.')
+})
 
+output$datapage <- renderText ({
+  paste('Allows the user to choose which variables to include in a dataframe. Gives the option to download the dataframe as a .csv file')
+})
+
+output$modelinfomlr <- renderText ({
+  paste("Multiple linear regression is used to examine the relationship between a response and mutiple predictor variables. Advantages: Because we can include both quantitative and categorical variables, it allows us to take into account more variables that might influence the response. Thus reducing error and bias. Disadvantages: The results can be hard to interpret. Also, assumptions and conditions can be hard to meet")
+})
+
+output$rfmodelinfo <- renderText ({
+  paste('A random forest model uses bootstrapping from the data and randomly selected predictors to find the best model. Advantages: because each tree will not include a highly correlated predictor, the model can be a better fit than other bagged methods. Disadvantage: The results can be hard to interpret and it can be computationally expensive.')
+})
+
+output$boostmodelinfo <- renderText ({
+  paste('A boosted tree model uses bootstrapping to grow trees sequentially. Each following tree is grown on a modified version of the original data. The predictions are then updated as the tree grows. Advantages: Often the best ensemble method. Disadvantages: The results are hard to interpret and it can be computationally expensive.')
+})
+
+output$ex3 <- renderUI({
+  withMathJax('$$Y_i= β_0+ β_1 x_1i+ β_2 x_2i+ β_3 x_1i x_2i+ E_i$$')
+})
 #Create quantitative outputs
 #______________________________________________________________________________________________________
 output$vars <- renderUI ({

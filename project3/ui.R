@@ -20,6 +20,7 @@ library(corrplot)
 library(htmltools)
 library(shinyWidgets)
 library(Metrics)
+# library(MathJax)
 
 house <- read.csv('house.csv')
 house$zipcode <- as.character(house$zipcode)
@@ -37,21 +38,21 @@ navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
   h1('About'),
-  # sidebarLayout(
-  # sidebarPanel(
-  # ),
-  # mainPanel(
     h3('Purpose of the app:'),
     textOutput('purpose'),
-    h3('Data Description'),
+    h3('Data Description:'),
     textOutput('datadesc'),
     uiOutput('link'),
-    img(src="kaggle.jpg", width="25%", align="center"),
-    h3('Page Descriptions'),
+    img(src="kaggle.jpg", width="10%", height = '10%', align="center"),
+    h3('Page Descriptions:'),
     h5('About Page'),
     textOutput('aboutdesc'),
-    h6('')
-  # )
+    h5('Data Exploration Page'),
+    textOutput('dataex'),
+    h5('Modeling Page'),
+    textOutput('modeling'),
+    h3("Data Page:"),
+    textOutput('datapage')
   ),
 navbarMenu('Data Exploration',
   tabPanel('Variables',
@@ -120,12 +121,16 @@ titlePanel('EDA'),
 )))),
 
 navbarMenu('Modeling',
-  tabPanel('Model Info',
+    tabPanel('Model Info',
     titlePanel('Model Info'),
-    sidebarLayout(
-    sidebarPanel(),
-    mainPanel()
-  )),
+    h5('Multiple Linear Regression Model'),
+    textOutput('modelinfomlr'),
+    uiOutput('ex3'),
+    h5('Random Forest Regression Model'),
+    textOutput('rfmodelinfo'),
+    h5('Boosted Tree Model'),
+    textOutput('boostmodelinfo')
+    ),
 tabPanel('Model Fitting',
   titlePanel('Model Fitting'),
     sidebarLayout(
@@ -234,16 +239,7 @@ sidebarPanel(
 mainPanel(
   box(withSpinner(dataTableOutput('sub')), width = 12)
 ),
-)),
-
-tabPanel('Trial',
-  titlePanel('trial'),
-    sidebarLayout(
-      sidebarPanel(),
-        mainPanel(
-         ),
-         )),
-
+))
 )))
   
   
