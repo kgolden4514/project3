@@ -22,6 +22,7 @@ library(htmltools)
 library(shinyWidgets)
 library(Metrics)
 
+#Read in dataset
 # setwd("C:/Documents/Github/project3/project3")
 house <- read.csv('./house.csv')
 house$zipcode <- as.character(house$zipcode)
@@ -48,11 +49,13 @@ shinyServer(function(input, output, session) {
   # home <- read.csv('house.csv')
 #Create datasets
 #________________________________________________________________________
-getData <- reactive({
+#create dataset for house
+  getData <- reactive({
   house
 })
 
-getDatadec <- reactive({
+#Filter data set by decade
+getDataDec <- reactive({
   v <- input$dec
   if (v != 'All Decades'){
     newData <- house %>% filter(decadeBuilt == v)
@@ -62,7 +65,8 @@ getDatadec <- reactive({
   }
 })
 
-getDatadec2 <- reactive({
+#Filter data by decade
+getDataDec2 <- reactive({
   v <- input$dec2
   if (v != 'All Decades'){
     newData2 <- house %>% filter(decadeBuilt == v)
@@ -72,6 +76,7 @@ getDatadec2 <- reactive({
   }
 })
 
+#Create train and test sets
 set.seed(100)  # setting seed to reproduce results of random sampling
 trainingRowIndex <-reactive({
   sample(1:nrow(getData()),
@@ -110,52 +115,65 @@ getData2 <- reactive ({
 
 #Create About page
 #_______________________________________________________________________
+#Purpose of app
 output$purpose <- renderText ({
     paste('The purpose of the app is to look into the King County, Washington State housing sales from May 2014 to May 2015. This app allows us to look at the quantitative and categorical variables, create prediction models, and predict the house price based off of user inputed predictors.')
 })
 
-output$datadesc <- renderText ({
+#Data description 
+output$dataDesc <- renderText ({
   paste('The data consists of housing sales data from King County in Washington state from May 2014 to May 2015. It provides the price of the home as well as information about the home, such as square footage, views, number of bedrooms, number of bathrooms, etc. This data will allow us to create prediction regression models. The data was obtained from kaggle.com. I did remove the data points for homes built after 2009. I did this because the data set was large and I wanted to lower the computational requirement.')
 })
 
+#Create dataset link
 url <- a('King County Dataset', href = 'https://www.kaggle.com/datasets/harlfoxem/housesalesprediction')
 output$link <- renderUI({
   tagList(url)
 })
 
-output$aboutdesc <- renderText ({
+#Question
+output$aboutDesc <- renderText ({
   paste('Gives the user a brief overview of the data and the purpose of the app.')
 })
 
-output$dataex <- renderText ({
+#Data Exploration description
+output$dataEx <- renderText ({
   paste("Allows us to look at the correlations between the variables, the distribution of the quantitative variables, and the frequency of the categorical variables.")
 })
 
+#Modeling page description
 output$modeling <- renderText ({
   paste('Model info: Gives a brief explanation of each type of model used: multiple linear regression, random forest regression, and boosted tree regression. Model fitting: Allows the user to select the predictor variables to consider, the response varaible to consider, the training and test data partition percentage, and train and fit the data to each model. Prediction: Allows the user the provide values for the predictors to predict the price of a home using the model of their choice.')
 })
 
-output$datapage <- renderText ({
+#Data page description
+output$dataPage <- renderText ({
   paste('Allows the user to choose which variables to include in a dataframe. Gives the option to download the dataframe as a .csv file')
 })
 
-output$modelinfomlr <- renderText ({
+#Modeling info MLR description
+output$modelInfoMLR <- renderText ({
   paste("Multiple linear regression is used to examine the relationship between a response and mutiple predictor variables. Advantages: Because we can include both quantitative and categorical variables, it allows us to take into account more variables that might influence the response. Thus reducing error and bias. Disadvantages: The results can be hard to interpret. Also, assumptions and conditions can be hard to meet")
 })
 
-output$rfmodelinfo <- renderText ({
+#Modeling infor random forest description
+output$rfModelInfo <- renderText ({
   paste('A random forest model uses bootstrapping from the data and randomly selected predictors to find the best model. Advantages: because each tree will not include a highly correlated predictor, the model can be a better fit than other bagged methods. Disadvantage: The results can be hard to interpret and it can be computationally expensive.')
 })
 
-output$boostmodelinfo <- renderText ({
+#Boosted model ino description
+output$boostModelInfo <- renderText ({
   paste('A boosted tree model uses bootstrapping to grow trees sequentially. Each following tree is grown on a modified version of the original data. The predictions are then updated as the tree grows. Advantages: Often the best ensemble method. Disadvantages: The results are hard to interpret and it can be computationally expensive.')
 })
 
+#Create equation for MLR
 output$ex3 <- renderUI({
   withMathJax('$$Y_i= β_0+ β_1 x_1i+ β_2 x_2i+ β_3 x_1i x_2i+ E_i$$')
 })
 #Create quantitative outputs
 #______________________________________________________________________________________________________
+
+#Create selectINput for quantitative variables
 output$vars <- renderUI ({
   if (input$quantCat == 'Quantitative') {
     selectInput('var', 'Choose Quantitative Variable',
@@ -174,6 +192,7 @@ output$vars <- renderUI ({
   }
 })
 
+#Create select input for graph type
 output$type <- renderUI ({
   if (input$quantCat == 'Quantitative') {
     selectInput('type', 'Choose graph type',
@@ -182,64 +201,66 @@ output$type <- renderUI ({
   }
 })
 
+#Create plot for quantitative variables
 output$graph <- renderPlot ({
   type <- input$type
   var <- input$var
   dec <- input$dec
-  newData <- getDatadec()
+  newData <- getDataDec()
   g <- ggplot(newData, aes_string(x = var))
   if ((type == 1) &  !input$year) {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_boxplot(color = '#FF1493', fill = '#FF1493', alpha = 0.2) +
       coord_flip()
     print(m)
   }
   else if ((type == 1) & input$year & dec != "All Decades") {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_boxplot(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2) + 
       coord_flip()
     print(m)
   }
   else if ((type == 1) & input$year & dec == "All Decades") {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_boxplot(aes(color = decadeBuilt, fill = decadeBuilt), 
                           alpha = 0.2) + coord_flip()
     print(m)
   }
   else if ((type == 2) & !input$year) {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_histogram(color = '#FF1493', fill = '#FF1493', alpha=0.2)
     print(m)
   }
   else if ((type ==2) & input$year & (dec == "All Decades")) {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_histogram(aes(color = decadeBuilt, fill = decadeBuilt), alpha=0.2)
     print(m)
   }
   else if ((type ==2) & input$year & (dec != "All Decades")) {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_histogram(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2)
     print(m)
   }
   if (!input$year & (input$quantCat == "Categorical")) {
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g +
       geom_bar(color = '#862efd', fill = '#862efd', alpha = 0.2)
     print(m)
   }
   else if (input$year & (input$quantCat == 'Categorical') & (input$dec == "All Decades")){
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_bar(aes(color = decadeBuilt, fill = decadeBuilt), alpha = 0.2)
     print(m)
   }
   else if (input$year & (input$quantCat == 'Categorical') & (input$dec != "All Decades")){
-    newData <- getDatadec()
+    newData <- getDataDec()
     m <- g + geom_bar(aes(color = yrBuiltCat, fill = yrBuiltCat), alpha = 0.2)
     print(m)
   }
 })
 
-output$statchoice <- renderUI ({
+#create selectInput for statistics
+output$statChoice <- renderUI ({
   if (input$quantCat == 'Quantitative')
     selectInput('stat', "Choose stat",
                 choices = list('Mean' = 'mean',
@@ -247,11 +268,12 @@ output$statchoice <- renderUI ({
                                'Standard Deviation' = 'sd'))
 })
 
+#Create data table for stat
 output$quantTable <- renderDataTable ({
   if (input$quantCat == 'Quantitative') {
   var <- input$var
   stat <- input$stat
-  newData <- getDatadec()
+  newData <- getDataDec()
   newDataSub <- newData[ , c('decadeBuilt', 'yrBuiltCat', var), drop = FALSE]
   tab <- aggregate(newDataSub[[var]] ~ decadeBuilt + yrBuiltCat,
                    data = newDataSub, FUN = stat)
@@ -264,12 +286,14 @@ output$quantTable <- renderDataTable ({
   }
 })
 
-output$quantTabley <- renderUI ({
+#Create part of title for data page
+output$quantTableY <- renderUI ({
   if (input$quantCat == 'Quantitative') {
     dataTableOutput('quantTable')
   }
 })
 
+#Create part of title for data page
 output$title <- renderUI({
   v <- input$dec
   var <- input$var
@@ -281,16 +305,18 @@ output$title <- renderUI({
   }
 })
 
+#Create frequency table output
 output$kabley <- renderUI ({
   if (input$quantCat == 'Categorical') {
     verbatimTextOutput('kable')
   }
 })
 
+#Creat frequency table
 output$kable <- renderPrint ({
   var <- input$var
   dec <- input$dec
-  newData <- getDatadec()
+  newData <- getDataDec()
   newDataSub <- newData[, c("decadeBuilt", "yrBuiltCat", var), drop = FALSE]
   colnames(newDataSub) <- c('decadeBuilt', 'yearBuilt', 'Three')
   if (!input$year & (input$quantCat == 'Categorical')) {
@@ -309,6 +335,7 @@ output$kable <- renderPrint ({
 
 #Create EDA
 #______________________________________________________________________________________________________
+#Create summary for each response variable
 output$Summ <- renderPrint ({
   if (input$begin) {  
   stargazer(
@@ -320,13 +347,15 @@ output$Summ <- renderPrint ({
   }
 })
 
+#Get structure of data set
 output$structure <- renderPrint ({
   if (input$begin){
   str(getData())
 }
 })
 
-output$ysum <- renderPrint ({
+#Create summary of each y value
+output$ySum <- renderPrint ({
   if (input$begin) {
   var <- input$resp
   newData <- getData()
@@ -335,6 +364,7 @@ output$ysum <- renderPrint ({
   }
 })
 
+#Create correlation plot
 output$ggp <- renderPlot ({
   if (input$begin) {
   newData <- getData()
@@ -343,6 +373,7 @@ output$ggp <- renderPlot ({
   }
 })
 
+#Create correlation plot
 output$corrp <- renderPlot ({
   if (input$begin) {
   newData <- getData()
@@ -359,15 +390,18 @@ output$corrp <- renderPlot ({
 
 #Create Model Fitting
 #______________________________________________________________________________________________________
+#divide the slider input by 100
 splitSlider <- reactive({
   input$Slider1 / 100
 })
 
+#Output the size of the training and test data
 output$cntTrain <-
   renderText(paste("Train Data:", nrow(trainingData()), "records"))
 output$cntTest <-
   renderText(paste("Test Data:", nrow(testData()), "records"))
 
+#Create selectInput for the predictor variables
 output$x <- renderUI ({
   if (input$response == 'yrBuilt') {
     selectInput('predictors', 'Choose predictor(s)',
@@ -452,6 +486,7 @@ output$x <- renderUI ({
   }
 })
 
+#Linear fit for user selected inputs
 linFit <- reactive ({
   trains <- trainingData()
   y <- input$response
@@ -467,18 +502,21 @@ linFit <- reactive ({
         trControl = trainControl(method = "cv", number = 5))
 })
 
-output$linsum <- renderPrint ({
+#Linear fit summary
+output$linSum <- renderPrint ({
   if (input$action) {
     summary(linFit())
   }
 })
 
-output$linplot <- renderPlot ({
+#Linear fit plot
+output$linPlot <- renderPlot ({
   if (input$action) {
     plot(linFit())
   }
 })
 
+#Boost fit for user selected inputs
 boostFit <- reactive ({
   train <- trainingData()
   y <- input$response
@@ -494,18 +532,21 @@ boostFit <- reactive ({
           trControl = trainControl(method = 'cv', number = 5), verbose=FALSE)
 })
 
-output$boostplot <- renderPlot ({
+#Boosted tree plot
+output$boostPlot <- renderPlot ({
   if (input$action) {
   plot(boostFit())
   }
 })
 
-output$boostsum <- renderPrint ({
+#Boosted tree summary
+output$boostSum <- renderPrint ({
   if (input$action){
   print(boostFit())
   }
 })
 
+#Random forest fit using user selected inputs
 rfFit <- reactive ({
   train <- trainingData()
   y <- input$response
@@ -520,18 +561,21 @@ rfFit <- reactive ({
           data.frame(mtry = 1:sqrt(ncol(train))))
 })
 
-output$rfplot <- renderPlot ({
+#Create random forest plot
+output$rfPlot <- renderPlot ({
   if (input$action) {
   plot(rfFit())
   }
 })
 
-output$rfsum <- renderPrint ({
+#Create random forest summary
+output$rfSum <- renderPrint ({
   if (input$action) {
   print(rfFit())
   }
 })
 
+#Linear RMSE
 output$linRMSE <- renderPrint ({
   if (input$action) {
     lin <- linFit()
@@ -543,6 +587,7 @@ output$linRMSE <- renderPrint ({
   }
 })
 
+#Random forest RMSE
 output$rfRMSE <- renderPrint ({
   if (input$action) {
     rf <- rfFit()
@@ -553,6 +598,7 @@ output$rfRMSE <- renderPrint ({
   }
 })
 
+#Boost RMSE
 output$boostRMSE <- renderPrint ({
   if (input$action) {
     boost <- boostFit()
@@ -570,6 +616,7 @@ output$boostRMSE <- renderPrint ({
   }
 })
 
+#Linear prediction
 linPred <- reactive ({
   response <- input$response
   test <- testData()
@@ -578,12 +625,15 @@ linPred <- reactive ({
   linearPred <- predict(linFit(), newdata = test)
 })
 
-output$linPredsum <- renderPrint ({
+#Linear prediction summary
+output$linPredSum <- renderPrint ({
   if (input$action) {
     summary(linFit())
   }
 })
 
+
+#Linear fit to test data
 linRMSE2 <- reactive ({
   response <- input$response
   test <- testData()
@@ -591,6 +641,7 @@ linRMSE2 <- reactive ({
   linRMSE2<- postResample(linPred(), obs = test)
 })
 
+#Random forest prediction
 rfPred <- reactive ({
   response <- input$response
   test <- testData()
@@ -599,6 +650,7 @@ rfPred <- reactive ({
   rfPred <- predict(rfFit(), newdata = test)
 })
 
+#Boosted prediction
 boostPred <- reactive ({
   response <- input$response
   boost <- boostFit()
@@ -610,13 +662,14 @@ boostPred <- reactive ({
   boostPred <- predict(boostFit(), newdata = test, n.trees = tree)
 })
 
-
+#Linear test RMSE
 output$linRMSE2P <- renderPrint ({
   if (input$action) {
     print(linRMSE2())
   }
 })
 
+#Random forest test RMSE
 rfRMSE2 <- reactive ({
     response <- input$response
     test <- testData()
@@ -624,12 +677,14 @@ rfRMSE2 <- reactive ({
     rfRMSE2 <- postResample(rfPred(), obs = testSub)
 })
 
+#Print random forest test RMSE
 output$rfRMSE2P <- renderPrint ({
   if (input$action) {
     print(rfRMSE2())
   }
 })
 
+#Get boosted test RMSE
 boostRMSE2 <- reactive ({
   response <- input$response
   test <- testData()
@@ -637,18 +692,21 @@ boostRMSE2 <- reactive ({
   boostRMSE2 <- postResample(boostPred(), obs = testSub)
 })
 
+#Print boosted test RMSE
 output$boostRMSE2P <- renderPrint ({
   if (input$action) {
     print(boostRMSE2())
   }
 })
 
+#Create data frame of all three RMSE
 modelsRMSE <- reactive ({
   data.frame(Linear.Model=linRMSE2()[1],
              Random.Forest.Model=rfRMSE2()[1], 
              Boost.Model=boostRMSE2()[1])
 })
 
+#Choose the lowest RMSE
 output$smallest <- renderPrint ({
   if (input$action) {
   smallest_RMSE<-colnames(modelsRMSE())[apply(modelsRMSE(),1,which.min)]
@@ -657,6 +715,7 @@ output$smallest <- renderPrint ({
   }
 })
 
+#Use linear fit to predict price for many predictors
 linFitAll <- reactive ({
   trains <- trainingData()
   train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
@@ -667,6 +726,7 @@ linFitAll <- reactive ({
         trControl = trainControl(method = "cv", number = 5))
 })
 
+#Use boosted tree fit to predict price for many predictors
 boostFitAll <- reactive ({
   train <- trainingData()
   train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
@@ -681,6 +741,7 @@ boostFitAll <- reactive ({
         trControl = trainControl(method = 'cv', number = 5), verbose=FALSE)
 })
 
+#Use random forest fit to predict price for many predictors
 rfFitAll <- reactive ({
   train <- trainingData()
   train(price ~ bedrooms + bathrooms + sqftLiving + sqftLot + waterfrontFac +
@@ -694,6 +755,7 @@ rfFitAll <- reactive ({
           data.frame(mtry = 1:sqrt(ncol(train))))
 })
 
+#Create data frame for use in predictions
 data <- reactive({
   df <- data.frame(expand.grid(bedrooms = input$bedrooms, bathrooms = input$bathrooms, 
                                sqftLiving = input$living,
@@ -702,6 +764,7 @@ data <- reactive({
                                decadeBuiltFac = input$decade))
 })
 
+#Create data frame of user input
 output$proPred <- renderDataTable ({
   data.frame(expand.grid(bedrooms = input$bedrooms, bathrooms = input$bathrooms, 
                          sqftLiving = input$living,
@@ -710,6 +773,7 @@ output$proPred <- renderDataTable ({
                          decadeBuiltFac = input$decade))
 })
 
+#Calculate price for user inputs
 output$predSpec <- renderPrint ({
   if (input$modelChoice == 1 & input$prediction) {
     a <- predict(linFitAll(), data())
@@ -736,6 +800,7 @@ output$cntTest2 <-
 
 #Data
 #______________________________________________________________________________________________________
+#Create subset data for data page
 subs <- reactive ({
   if (length(input$col) == 0) {
     return(home)
@@ -745,10 +810,12 @@ subs <- reactive ({
   }
 })
 
+#Create data table for subsetted data
 output$sub <- renderDataTable({
   subs()
 })
 
+#Give download option
 output$downloadData <- downloadHandler(
   filename = function() {
     paste(input$col, ".csv", sep = "")

@@ -21,6 +21,7 @@ library(htmltools)
 library(shinyWidgets)
 library(Metrics)
 
+#read in dataset
 house <- read.csv('house.csv')
 house$zipcode <- as.character(house$zipcode)
 house$renovatedFac <- as.factor(house$renovatedYN)
@@ -32,6 +33,7 @@ house$zipcodeFac <- as.factor(house$zipcode)
 house$yrBuiltCat <- as.character(house$yrBuilt)
 home <- read.csv('house.csv')
 
+
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
@@ -40,18 +42,18 @@ tabPanel('About',
     h3('Purpose of the app:'),
     textOutput('purpose'),
     h3('Data Description:'),
-    textOutput('datadesc'),
+    textOutput('dataDesc'),
     uiOutput('link'),
     img(src="kaggle.jpg", width="10%", height = '10%', align="center"),
     h3('Page Descriptions:'),
     h5('About Page'),
-    textOutput('aboutdesc'),
+    textOutput('aboutDesc'),
     h5('Data Exploration Page'),
-    textOutput('dataex'),
+    textOutput('dataEx'),
     h5('Modeling Page'),
     textOutput('modeling'),
     h3("Data Page:"),
-    textOutput('datapage')
+    textOutput('dataPage')
   ),
 navbarMenu('Data Exploration',
   tabPanel('Variables',
@@ -78,11 +80,11 @@ navbarMenu('Data Exploration',
       uiOutput('type'),
       checkboxInput('year', 'Color Code by Year Note: All Decades will code 
                     by Decade'),
-      uiOutput('statchoice'),
+      uiOutput('statChoice'),
     ),
     mainPanel(
       plotOutput('graph'),
-      uiOutput('quantTabley'),
+      uiOutput('quantTableY'),
       uiOutput('kabley')
     )
   )),
@@ -109,7 +111,7 @@ titlePanel('EDA'),
            width = 12,
            tabPanel(
              "Data Summary",
-             box(withSpinner(verbatimTextOutput('ysum')), title = 'Summary of Response', width = 6)
+             box(withSpinner(verbatimTextOutput('ySum')), title = 'Summary of Response', width = 6)
              ),
            tabPanel(
              "Plots",
@@ -123,12 +125,12 @@ navbarMenu('Modeling',
     tabPanel('Model Info',
     titlePanel('Model Info'),
     h5('Multiple Linear Regression Model'),
-    textOutput('modelinfomlr'),
+    textOutput('modelInfoMLR'),
     uiOutput('ex3'),
     h5('Random Forest Regression Model'),
-    textOutput('rfmodelinfo'),
+    textOutput('rfModelInfo'),
     h5('Boosted Tree Model'),
-    textOutput('boostmodelinfo')
+    textOutput('boostModelInfo')
     ),
 tabPanel('Model Fitting',
   titlePanel('Model Fitting'),
@@ -174,14 +176,14 @@ tabPanel('Model Fitting',
         
       ),
       tabPanel("Summary",
-        box(withSpinner(verbatimTextOutput('linsum')), title = 'Summary of linear fit'),
-        box(withSpinner(verbatimTextOutput('rfsum')), width = 6, 
+        box(withSpinner(verbatimTextOutput('linSum')), title = 'Summary of linear fit'),
+        box(withSpinner(verbatimTextOutput('rfSum')), width = 6, 
             title = 'Summary of random forest fit'),
-        box(withSpinner(verbatimTextOutput('boostsum')), width = 6, title = 'Summary of boost fit')
+        box(withSpinner(verbatimTextOutput('boostSum')), width = 6, title = 'Summary of boost fit')
       ),
       tabPanel("Plots",
-        box(withSpinner(plotOutput('boostplot')), width = 6, title = 'Plot of boost fit'),
-        box(withSpinner(plotOutput('rfplot')), width = 6, title = 'Plot of random forest fit')
+        box(withSpinner(plotOutput('boostPlot')), width = 6, title = 'Plot of boost fit'),
+        box(withSpinner(plotOutput('rfPlot')), width = 6, title = 'Plot of random forest fit')
       )
     )
     )
