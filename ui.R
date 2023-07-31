@@ -1,5 +1,25 @@
-x <- c('shiny', 'dplyr', 'ggplot2', 'tidyverse', 'scales', 'cowplot', 'knitr', 'caret', 'randomForest', 'shinydashboard', 'shinycssloaders', 'maps', 'leaflet', 'plotly', 'corrplot', 'stargazer', 'shinythemes', 'recipes', 'GGally', 'corrplot', 'htmltools', 'shinyWidgets', 'Metrics')
-invisible(lapply(x, library, character.only = TRUE))
+library(ggplot2)
+library(shiny)
+library(tidyverse)
+library(scales)
+library(cowplot)
+library(knitr)
+library(caret)
+library(randomForest)
+library(shinydashboard)
+library(shinycssloaders)
+library(maps)
+library(leaflet)
+library(plotly)
+library(corrplot)
+library(stargazer)
+library(shinythemes)
+library(recipes)
+library(GGally)
+library(corrplot)
+library(htmltools)
+library(shinyWidgets)
+library(Metrics)
 
 house <- read.csv('house.csv')
 house$zipcode <- as.character(house$zipcode)
@@ -13,7 +33,6 @@ house$yrBuiltCat <- as.character(house$yrBuilt)
 home <- read.csv('house.csv')
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
-                  house <- read.csv('house.csv'),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
