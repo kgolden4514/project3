@@ -1,29 +1,7 @@
-library(shiny)
-library(dplyr)
-library(ggplot2)
-library(tidyverse)
-library(scales)
-library(cowplot)
-library(knitr)
-library(caret)
-library(randomForest)
-library(shinydashboard)
-library(shinycssloaders)
-library(maps)
-library(leaflet)
-library(plotly)
-library(corrplot)
-library(stargazer)
-library(shinythemes)
-library(recipes)
-library(GGally)
-library(corrplot)
-library(htmltools)
-library(shinyWidgets)
-library(Metrics)
+x <- c('shiny', 'dplyr', 'ggplot2', 'tidyverse', 'scales', 'cowplot', 'knitr', 'caret', 'randomForest', 'shinydashboard', 'shinycssloaders', 'maps', 'leaflet', 'plotly', 'corrplot', 'stargazer', 'shinythemes', 'recipes', 'GGally', 'corrplot', 'htmltools', 'shinyWidgets', 'Metrics', 'abc')
+invisible(lapply(x, library, character.only = TRUE))
 
-setwd("C:/Documents/Github/project3")
-house <- read.csv('house.csv')
+house <- read.csv('./house.csv')
 house$zipcode <- as.character(house$zipcode)
 house$renovatedFac <- as.factor(house$renovatedYN)
 house$basementFac<- as.factor(house$basementYN)
@@ -35,8 +13,8 @@ house$yrBuiltCat <- as.character(house$yrBuilt)
 home <- read.csv('house.csv')
 
 shinyServer(function(input, output, session) {
-  setwd("C:/Documents/Github/project3")
-  house <- read.csv('house.csv')
+  setwd("C:/Documents/Github/project3/project3")
+  house <- read.csv('./house.csv')
   house$zipcode <- as.character(house$zipcode)
   house$renovatedFac <- as.factor(house$renovatedYN)
   house$basementFac<- as.factor(house$basementYN)
@@ -47,7 +25,7 @@ shinyServer(function(input, output, session) {
   house$yrBuiltCat <- as.character(house$yrBuilt)
   home <- read.csv('house.csv')
 #Create datasets
-#_______________________________________________________________________________________________________
+#________________________________________________________________________
 getData <- reactive({
   house
 })
@@ -108,6 +86,52 @@ getData2 <- reactive ({
   home
 })
 
+#Create About page
+#_______________________________________________________________________
+output$purpose <- renderText ({
+    paste('The purpose of the app is to look into the King County, Washington State housing sales from May 2014 to May 2015. This app allows us to look at the quantitative and categorical variables, create prediction models, and predict the house price based off of user inputed predictors.')
+})
+
+output$datadesc <- renderText ({
+  paste('The data consists of housing sales data from King County in Washington state from May 2014 to May 2015. It provides the price of the home as well as information about the home, such as square footage, views, number of bedrooms, number of bathrooms, etc. This data will allow us to create prediction regression models. The data was obtained from kaggle.com. I did remove the data points for homes built after 2009. I did this because the data set was large and I wanted to lower the computational requirement.')
+})
+
+url <- a('King County Dataset', href = 'https://www.kaggle.com/datasets/harlfoxem/housesalesprediction')
+output$link <- renderUI({
+  tagList(url)
+})
+
+output$aboutdesc <- renderText ({
+  paste('Gives the user a brief overview of the data and the purpose of the app.')
+})
+
+output$dataex <- renderText ({
+  paste("Allows us to look at the correlations between the variables, the distribution of the quantitative variables, and the frequency of the categorical variables.")
+})
+
+output$modeling <- renderText ({
+  paste('Model info: Gives a brief explanation of each type of model used: multiple linear regression, random forest regression, and boosted tree regression. Model fitting: Allows the user to select the predictor variables to consider, the response varaible to consider, the training and test data partition percentage, and train and fit the data to each model. Prediction: Allows the user the provide values for the predictors to predict the price of a home using the model of their choice.')
+})
+
+output$datapage <- renderText ({
+  paste('Allows the user to choose which variables to include in a dataframe. Gives the option to download the dataframe as a .csv file')
+})
+
+output$modelinfomlr <- renderText ({
+  paste("Multiple linear regression is used to examine the relationship between a response and mutiple predictor variables. Advantages: Because we can include both quantitative and categorical variables, it allows us to take into account more variables that might influence the response. Thus reducing error and bias. Disadvantages: The results can be hard to interpret. Also, assumptions and conditions can be hard to meet")
+})
+
+output$rfmodelinfo <- renderText ({
+  paste('A random forest model uses bootstrapping from the data and randomly selected predictors to find the best model. Advantages: because each tree will not include a highly correlated predictor, the model can be a better fit than other bagged methods. Disadvantage: The results can be hard to interpret and it can be computationally expensive.')
+})
+
+output$boostmodelinfo <- renderText ({
+  paste('A boosted tree model uses bootstrapping to grow trees sequentially. Each following tree is grown on a modified version of the original data. The predictions are then updated as the tree grows. Advantages: Often the best ensemble method. Disadvantages: The results are hard to interpret and it can be computationally expensive.')
+})
+
+output$ex3 <- renderUI({
+  withMathJax('$$Y_i= β_0+ β_1 x_1i+ β_2 x_2i+ β_3 x_1i x_2i+ E_i$$')
+})
 #Create quantitative outputs
 #______________________________________________________________________________________________________
 output$vars <- renderUI ({

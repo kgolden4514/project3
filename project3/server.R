@@ -13,17 +13,17 @@ house$yrBuiltCat <- as.character(house$yrBuilt)
 home <- read.csv('house.csv')
 
 shinyServer(function(input, output, session) {
-  # setwd("C:/Documents/Github/project3/project3")
-  # house <- read.csv('./house.csv')
-  # house$zipcode <- as.character(house$zipcode)
-  # house$renovatedFac <- as.factor(house$renovatedYN)
-  # house$basementFac<- as.factor(house$basementYN)
-  # house$waterfrontFac <- as.factor(house$waterfrontYN)
-  # house$yrBuiltFac <- as.factor(house$yrBuilt)
-  # house$decadeBuiltFac <- as.factor(house$decadeBuilt)
-  # house$zipcodeFac <- as.factor(house$zipcode)
-  # house$yrBuiltCat <- as.character(house$yrBuilt)
-  # home <- read.csv('house.csv')
+  setwd("C:/Documents/Github/project3/project3")
+  house <- read.csv('./house.csv')
+  house$zipcode <- as.character(house$zipcode)
+  house$renovatedFac <- as.factor(house$renovatedYN)
+  house$basementFac<- as.factor(house$basementYN)
+  house$waterfrontFac <- as.factor(house$waterfrontYN)
+  house$yrBuiltFac <- as.factor(house$yrBuilt)
+  house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+  house$zipcodeFac <- as.factor(house$zipcode)
+  house$yrBuiltCat <- as.character(house$yrBuilt)
+  home <- read.csv('house.csv')
 #Create datasets
 #________________________________________________________________________
 getData <- reactive({

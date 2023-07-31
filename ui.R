@@ -1,35 +1,39 @@
-library(ggplot2)
-library(shiny)
-library(tidyverse)
-library(scales)
-library(cowplot)
-library(knitr)
-library(caret)
-library(randomForest)
-library(shinydashboard)
-library(shinycssloaders)
-library(maps)
-library(leaflet)
-library(plotly)
-library(corrplot)
-library(stargazer)
-library(shinythemes)
-library(recipes)
-library(GGally)
-library(corrplot)
-library(htmltools)
-library(shinyWidgets)
-library(Metrics)
+x <- c('shiny', 'dplyr', 'ggplot2', 'tidyverse', 'scales', 'cowplot', 'knitr', 'caret', 'randomForest', 'shinydashboard', 'shinycssloaders', 'maps', 'leaflet', 'plotly', 'corrplot', 'stargazer', 'shinythemes', 'recipes', 'GGally', 'corrplot', 'htmltools', 'shinyWidgets', 'Metrics', 'abc')
+invisible(lapply(x, library, character.only = TRUE))
+
+house <- read.csv('house.csv')
+house$zipcode <- as.character(house$zipcode)
+house$renovatedFac <- as.factor(house$renovatedYN)
+house$basementFac<- as.factor(house$basementYN)
+house$waterfrontFac <- as.factor(house$waterfrontYN)
+house$yrBuiltFac <- as.factor(house$yrBuilt)
+house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+house$zipcodeFac <- as.factor(house$zipcode)
+house$yrBuiltCat <- as.character(house$yrBuilt)
+home <- read.csv('house.csv')
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
+                  house <- read.csv('house.csv'),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
-  titlePanel('About'),
-  sidebarLayout(
-  sidebarPanel(),
-  mainPanel()
-  )),
+  h1('About'),
+    h3('Purpose of the app:'),
+    textOutput('purpose'),
+    h3('Data Description:'),
+    textOutput('datadesc'),
+    uiOutput('link'),
+    img(src="kaggle.jpg", width="10%", height = '10%', align="center"),
+    h3('Page Descriptions:'),
+    h5('About Page'),
+    textOutput('aboutdesc'),
+    h5('Data Exploration Page'),
+    textOutput('dataex'),
+    h5('Modeling Page'),
+    textOutput('modeling'),
+    h3("Data Page:"),
+    textOutput('datapage')
+  ),
 navbarMenu('Data Exploration',
   tabPanel('Variables',
     titlePanel(uiOutput('title')),
@@ -97,12 +101,16 @@ titlePanel('EDA'),
 )))),
 
 navbarMenu('Modeling',
-  tabPanel('Model Info',
+    tabPanel('Model Info',
     titlePanel('Model Info'),
-    sidebarLayout(
-    sidebarPanel(),
-    mainPanel()
-  )),
+    h5('Multiple Linear Regression Model'),
+    textOutput('modelinfomlr'),
+    uiOutput('ex3'),
+    h5('Random Forest Regression Model'),
+    textOutput('rfmodelinfo'),
+    h5('Boosted Tree Model'),
+    textOutput('boostmodelinfo')
+    ),
 tabPanel('Model Fitting',
   titlePanel('Model Fitting'),
     sidebarLayout(
@@ -211,7 +219,7 @@ sidebarPanel(
 mainPanel(
   box(withSpinner(dataTableOutput('sub')), width = 12)
 ),
-)),
+))
 )))
   
   

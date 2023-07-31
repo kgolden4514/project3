@@ -13,6 +13,7 @@ house$yrBuiltCat <- as.character(house$yrBuilt)
 home <- read.csv('house.csv')
 
 shinyUI(fluidPage(theme = shinytheme("cyborg"),
+                  house <- read.csv('house.csv'),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
