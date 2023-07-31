@@ -20,7 +20,6 @@ library(corrplot)
 library(htmltools)
 library(shinyWidgets)
 library(Metrics)
-# library(MathJax)
 
 house <- read.csv('house.csv')
 house$zipcode <- as.character(house$zipcode)

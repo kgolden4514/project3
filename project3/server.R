@@ -21,7 +21,6 @@ library(corrplot)
 library(htmltools)
 library(shinyWidgets)
 library(Metrics)
-# library(MathJax)
 
 # setwd("C:/Documents/Github/project3/project3")
 house <- read.csv('./house.csv')
