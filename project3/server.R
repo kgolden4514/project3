@@ -36,18 +36,18 @@ home <- read.csv('house.csv')
 
 shinyServer(function(input, output, session) {
   # setwd("C:/Documents/Github/project3/project3")
-  house <- read.csv('./house.csv')
-  house$zipcode <- as.character(house$zipcode)
-  house$renovatedFac <- as.factor(house$renovatedYN)
-  house$basementFac<- as.factor(house$basementYN)
-  house$waterfrontFac <- as.factor(house$waterfrontYN)
-  house$yrBuiltFac <- as.factor(house$yrBuilt)
-  house$decadeBuiltFac <- as.factor(house$decadeBuilt)
-  house$zipcodeFac <- as.factor(house$zipcode)
-  house$yrBuiltCat <- as.character(house$yrBuilt)
-  home <- read.csv('house.csv')
+  # house <- read.csv('./house.csv')
+  # house$zipcode <- as.character(house$zipcode)
+  # house$renovatedFac <- as.factor(house$renovatedYN)
+  # house$basementFac<- as.factor(house$basementYN)
+  # house$waterfrontFac <- as.factor(house$waterfrontYN)
+  # house$yrBuiltFac <- as.factor(house$yrBuilt)
+  # house$decadeBuiltFac <- as.factor(house$decadeBuilt)
+  # house$zipcodeFac <- as.factor(house$zipcode)
+  # house$yrBuiltCat <- as.character(house$yrBuilt)
+  # home <- read.csv('house.csv')
 #Create datasets
-#_______________________________________________________________________________________________________
+#________________________________________________________________________
 getData <- reactive({
   house
 })
@@ -107,6 +107,27 @@ testData2 <- reactive({
 getData2 <- reactive ({
   home
 })
+
+#Create About page
+#_______________________________________________________________________
+output$purpose <- renderText ({
+    paste('The purpose of the app is to look into the King County, Washington State housing sales from May 2014 to May 2015. This app allows us to look at the quantitative and categorical variables, create prediction models, and predict the house price based off of user inputed predictors.')
+})
+
+output$datadesc <- renderText ({
+  paste('The data consists of housing sales data from King County in Washington state from May 2014 to May 2015. It provides the price of the home as well as information about the home, such as square footage, views, number of bedrooms, number of bathrooms, etc. This data will allow us to create prediction regression models. The data was obtained from kaggle.com. I did remove the data points for homes built after 2009. I did this because the data set was large and I wanted to lower the computational requirement.')
+})
+
+url <- a('King County Dataset', href = 'https://www.kaggle.com/datasets/harlfoxem/housesalesprediction')
+output$link <- renderUI({
+  tagList(url)
+})
+
+output$aboutdesc <- renderText ({
+  paste('Gives the user a brief overview of the data and the purpose of the app.')
+})
+
+
 
 #Create quantitative outputs
 #______________________________________________________________________________________________________

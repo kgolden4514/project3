@@ -36,14 +36,23 @@ shinyUI(fluidPage(theme = shinytheme("cyborg"),
 navbarPage('Golden Project 3',
 #Code for About Page ---------------------------------------------------------     
 tabPanel('About',
-  titlePanel('About'),
-  sidebarLayout(
-  sidebarPanel(
+  h1('About'),
+  # sidebarLayout(
+  # sidebarPanel(
+  # ),
+  # mainPanel(
+    h3('Purpose of the app:'),
+    textOutput('purpose'),
+    h3('Data Description'),
+    textOutput('datadesc'),
+    uiOutput('link'),
+    img(src="kaggle.jpg", width="25%", align="center"),
+    h3('Page Descriptions'),
+    h5('About Page'),
+    textOutput('aboutdesc'),
+    h6('')
+  # )
   ),
-  mainPanel(
-    img(src="kaggle.jpg", width="25%", align="center")
-  )
-  )),
 navbarMenu('Data Exploration',
   tabPanel('Variables',
     titlePanel(uiOutput('title')),
@@ -226,6 +235,15 @@ mainPanel(
   box(withSpinner(dataTableOutput('sub')), width = 12)
 ),
 )),
+
+tabPanel('Trial',
+  titlePanel('trial'),
+    sidebarLayout(
+      sidebarPanel(),
+        mainPanel(
+         ),
+         )),
+
 )))
   
   
