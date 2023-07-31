@@ -1,4 +1,4 @@
-x <- c('shiny', 'dplyr', 'ggplot2', 'tidyverse', 'scales', 'cowplot', 'knitr', 'caret', 'randomForest', 'shinydashboard', 'shinycssloaders', 'maps', 'leaflet', 'plotly', 'corrplot', 'stargazer', 'shinythemes', 'recipes', 'GGally', 'corrplot', 'htmltools', 'shinyWidgets', 'Metrics', 'abc')
+x <- c('shiny', 'dplyr', 'ggplot2', 'tidyverse', 'scales', 'cowplot', 'knitr', 'caret', 'randomForest', 'shinydashboard', 'shinycssloaders', 'maps', 'leaflet', 'plotly', 'corrplot', 'stargazer', 'shinythemes', 'recipes', 'GGally', 'corrplot', 'htmltools', 'shinyWidgets', 'Metrics')
 invisible(lapply(x, library, character.only = TRUE))
 
 house <- read.csv('house.csv')
